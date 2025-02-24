@@ -2,6 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 # Custom User Model
 class User(AbstractUser):
     USER_TYPES = [
@@ -16,12 +17,13 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
 
+
 # Issue Model
 class Issue(models.Model):
     ISSUE_CATEGORIES = [
         ('missing_marks', 'Missing Marks'),
         ('appeal', 'Appeal'),
-        ('correction', 'Correction'),    ]
+        ('correction', 'Correction'), ]
 
     STATUS_CHOICES = [
         ('open', 'Open'),
@@ -41,6 +43,7 @@ class Issue(models.Model):
     def __str__(self):
         return f"{self.title} - {self.get_status_display()}"
 
+
 # Comment Model
 class Comment(models.Model):
     issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
@@ -50,6 +53,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.commented_by.username} on {self.issue.title}"
+
 
 #  Notification Model
 class Notification(models.Model):
@@ -61,6 +65,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
+
 
 #  Audit Trail Model (Logs actions performed on issues)
 class AuditTrail(models.Model):
