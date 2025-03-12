@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Issue, Comment, Notification, AuditTrail
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -8,7 +9,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ['id', 'username', 'email', 'user_type', 'department']
 
 # Issue Serializer
 class IssueSerializer(serializers.ModelSerializer):
@@ -16,7 +17,7 @@ class IssueSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Issue
-        fields = '__all__'
+        fields = ['id', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
 
 # Comment Serializer
 class CommentSerializer(serializers.ModelSerializer):
@@ -24,13 +25,13 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['id', 'issue', 'commented_by', 'text', 'created_at']
 
 # Notification Serializer
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = '__all__'
+        fields =['id', 'user', 'issue', 'message', 'is_read', 'created_at']
 
 # Audit Trail Serializer
 class AuditTrailSerializer(serializers.ModelSerializer):
@@ -38,4 +39,34 @@ class AuditTrailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AuditTrail
-        fields = '__all__'
+        fields = ['id', 'issue', 'action_by', 'action_description', 'timestamp']
+        
+#user registration serializer
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
+        
+        def create(self, validated_data):
+            user = User.objects.create_user(**validated_data)
+            return user 
+        
+    #user login serializer
+    class LoginSerializer(serializers.Serializer):
+        username=serializers.CharField()
+        password = serializers.CharField(write_only=True)
+        
+        def validate(self, data):
+            from django.contrib.auth import authenticate
+            user = authenticate(username=data['username'], password=data['password'])
+            if not user:
+                raise serializers.ValidationError("Invalid Credentials")
+            refresh = RefreshToken.for_user(user)
+            return {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user).data
+            }
+            
