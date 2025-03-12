@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 # from django.conf.global_settings import AUTH_USER_MODEL
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -33,6 +35,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'issue_tracker',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -41,6 +45,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), #token expires in 1 hour
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7), #refresh token lasts 7 days a week
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 AUTH_USER_MODEL = 'issue_tracker.User'
 
