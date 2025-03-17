@@ -1,5 +1,6 @@
 // This component is the home page of the site. It contains a brief description of the site and what it does.
 // It also contains a welcome message to the user and a prompt to log in or register.
+import './Home.css';
 function Home() {
     return (
         <div className="home">
