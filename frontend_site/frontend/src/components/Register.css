@@ -42,3 +42,10 @@
     border: 1px solid #ccc;
     border-radius: 4px;
 }
+.register-container button {
+    padding: 10px;
+    background: #6a11cb;
+    color: white;
+    border: none;
+    border-radius: 4px;
+}    
