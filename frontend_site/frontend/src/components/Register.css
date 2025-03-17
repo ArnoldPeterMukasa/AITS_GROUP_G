@@ -35,3 +35,10 @@
     margin-bottom: 5px;
     font-weight: bold;
 }
+.register-container input,
+.register-container select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
