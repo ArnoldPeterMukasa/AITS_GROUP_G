@@ -24,3 +24,10 @@
     display: flex;
     justify-content: space-between;
 }
+.register-container .form-group {
+    margin-bottom: 15px;
+    flex: 1;
+}
+.register-container .form-group:not(:last-child) {
+    margin-right: 10px;
+}
