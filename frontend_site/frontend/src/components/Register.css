@@ -7,3 +7,7 @@
     background: #f5f5f5;
     padding: 20px;
 }
+.register-container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
