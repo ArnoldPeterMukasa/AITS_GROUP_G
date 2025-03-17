@@ -40,8 +40,8 @@ class AuditTrailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditTrail
         fields = ['id', 'issue', 'action_by', 'action_description', 'timestamp']
-        
-#user registration serializer
+
+# User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     
@@ -49,24 +49,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
         
-        def create(self, validated_data):
-            user = User.objects.create_user(**validated_data)
-            return user 
-        
-    #user login serializer
-    class LoginSerializer(serializers.Serializer):
-        username=serializers.CharField()
-        password = serializers.CharField(write_only=True)
-        
-        def validate(self, data):
-            from django.contrib.auth import authenticate
-            user = authenticate(username=data['username'], password=data['password'])
-            if not user:
-                raise serializers.ValidationError("Invalid Credentials")
-            refresh = RefreshToken.for_user(user)
-            return {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': UserSerializer(user).data
-            }
-            
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user 
+
+# User Login Serializer
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    
+    def validate(self, data):
+        from django.contrib.auth import authenticate
+        user = authenticate(username=data['username'], password=data['password'])
+        if not user:
+            raise serializers.ValidationError("Invalid Credentials")
+        refresh = RefreshToken.for_user(user)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': UserSerializer(user).data
+        }
