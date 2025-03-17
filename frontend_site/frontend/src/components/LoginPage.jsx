@@ -1,4 +1,4 @@
-function Login() {
+function LoginPage() {
     const handleSubmit = (event) => {
         event.preventDefault();
         // Handle login logic here
@@ -32,6 +32,6 @@ function Login() {
           );
         }
         
-        export default Login;
+        export default LoginPage;
 
 
