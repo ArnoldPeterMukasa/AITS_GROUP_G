@@ -31,3 +31,7 @@
 .register-container .form-group:not(:last-child) {
     margin-right: 10px;
 }
+.register-container label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
