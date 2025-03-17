@@ -29,7 +29,7 @@ function LoginPage() {
                 <p>Don't have an account? <a href="">Signup</a></p>
             </form>
         </div>
-          );
+        );
         }
         
         export default LoginPage;
