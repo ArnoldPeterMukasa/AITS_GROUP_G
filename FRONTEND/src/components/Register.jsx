@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Register.css';
 
 function RegisterPage() {
@@ -62,6 +63,7 @@ function RegisterPage() {
                     <input type="text" id="course" required />
                 </div>
                 <button type="submit">Register</button>
+                <p>Already have an account? <Link to="/login">Login</Link></p>
             </form>
         </div>
     );
