@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Issue, Comment, Notification, AuditTrail
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, CommentSerializer, NotificationSerializer, AuditTrailSerializer
+from .permissions import IsStudent, IsLecturer, IsRegistrar
 
 User = get_user_model()
 
@@ -56,7 +57,7 @@ class UserListView(generics.ListAPIView):
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated] # Only authenticated users can access
+    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
 
     def perform_create(self, serializer):
         serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by
@@ -65,7 +66,7 @@ class IssueListCreateView(generics.ListCreateAPIView):
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsLecturer] # Only Lecturers can access
 
 # List and Create Comments
 class CommentListCreateView(generics.ListCreateAPIView):
@@ -88,4 +89,4 @@ class NotificationListView(generics.ListAPIView):
 class AuditTrailListView(generics.ListAPIView):
     queryset = AuditTrail.objects.all()
     serializer_class = AuditTrailSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsRegistrar]  # Only Registrar can access
