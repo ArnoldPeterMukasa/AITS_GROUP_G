@@ -42,7 +42,7 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({"message": "Logged out successfully"}, status=200)
-        except Exception as e:
+        except Exception as _:
             return Response({"error": "Invalid token"}, status=400)   
     
 
