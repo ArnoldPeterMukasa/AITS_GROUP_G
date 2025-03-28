@@ -72,7 +72,18 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated, IsLecturer] # Only Lecturers can access
 
     def perform_update(self, serializer):
-
+        issue = self.get_object()
+        oldstatus = issue.status
+        updated_issue = serializer.save()
+        new_status = updated_issue.status
+        
+        #check if status has changes
+        if oldstatus != new_status:
+            student = updated_issue.reported_by
+            subject = f"Issue '{updated_issue.title}' has been updated"
+            message = f" hello {student.username},\n\n The status of your issue '{updated_issue.title}' has been updated to '{new_status}'."
+            
+            send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
 
 # List and Create Comments
 class CommentListCreateView(generics.ListCreateAPIView):
