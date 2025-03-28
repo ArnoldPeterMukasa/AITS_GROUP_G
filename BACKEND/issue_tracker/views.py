@@ -6,6 +6,10 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import Issue, Comment, Notification, AuditTrail
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, CommentSerializer, NotificationSerializer, AuditTrailSerializer
+from .permissions import IsStudent, IsLecturer, IsRegistrar
+
+from django.core.mail import send_mail
+
 
 User = get_user_model()
 
@@ -42,7 +46,7 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response({"message": "Logged out successfully"}, status=200)
-        except Exception as e:
+        except Exception as _:
             return Response({"error": "Invalid token"}, status=400)   
     
 
@@ -50,28 +54,42 @@ class LogoutView(APIView):
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsRegistrar] # Only Registrar can access
 
 # Create and List Issues
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
 
     def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)  # Assign current user
+        serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by
 
 #  Retrieve, Update, and Delete an Issue
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsLecturer] # Only Lecturers can access
+
+    def perform_update(self, serializer):
+        issue = self.get_object()
+        oldstatus = issue.status
+        updated_issue = serializer.save()
+        new_status = updated_issue.status
+        
+        #check if status has changes
+        if oldstatus != new_status:
+            student = updated_issue.reported_by
+            subject = f"Issue '{updated_issue.title}' has been updated"
+            message = f" hello {student.username},\n\n The status of your issue '{updated_issue.title}' has been updated to '{new_status}'."
+            
+            send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
 
 # List and Create Comments
 class CommentListCreateView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated] 
 
     def perform_create(self, serializer):
         serializer.save(commented_by=self.request.user)
@@ -88,4 +106,4 @@ class NotificationListView(generics.ListAPIView):
 class AuditTrailListView(generics.ListAPIView):
     queryset = AuditTrail.objects.all()
     serializer_class = AuditTrailSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated, IsRegistrar]  # Only Registrar can access
