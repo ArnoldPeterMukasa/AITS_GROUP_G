@@ -8,6 +8,9 @@ from .models import Issue, Comment, Notification, AuditTrail
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, CommentSerializer, NotificationSerializer, AuditTrailSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 
+from django.core.mail import send_mail
+
+
 User = get_user_model()
 
 #user registration
@@ -67,6 +70,9 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
     permission_classes = [permissions.IsAuthenticated, IsLecturer] # Only Lecturers can access
+
+    def perform_update(self, serializer):
+
 
 # List and Create Comments
 class CommentListCreateView(generics.ListCreateAPIView):
