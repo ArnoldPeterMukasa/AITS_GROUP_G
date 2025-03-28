@@ -17,16 +17,16 @@ User = get_user_model()
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
     
     
 #user login
 class LoginView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
-        if serializer .is_valid():
+        if serializer.is_valid():
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
             return Response({
