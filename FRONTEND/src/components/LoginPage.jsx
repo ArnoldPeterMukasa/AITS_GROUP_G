@@ -24,12 +24,21 @@ function LoginPage() {
         setError(null);
 
         // Handle the actual login logic here (e.g., API call)
-
-        // For now, just log to the console and navigate to the dashboard
         console.log("Form Submitted", { username, password, rememberMe });
 
-        // Redirect to the dashboard after successful login
-        navigate("/student-dashboard");
+        // For now, let's assume we get the role from the login process (could come from an API)
+        const userRole = "registrar"; // Example hardcoded role for registrar
+
+        // Redirect to the correct dashboard based on role
+        if (userRole === 'Registrar') {
+            navigate("/AcademicRegistrarDashboard");
+        } else if (userRole === 'Student') {
+            navigate("/StudentDashboard");
+        } else if (userRole === 'Lecturer') {
+            navigate("/LecturerDashboard");
+        } else {
+            setError("Invalid role or credentials");
+        }
     };
 
     return (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Import useNavigate hook
 import './Register.css';
 
-function RegisterPage() {
+function Register() {
     const navigate = useNavigate(); // Hook to navigate to another page
     
     const [role, setRole] = useState('student'); // Default role is 'student'
@@ -45,12 +45,13 @@ function RegisterPage() {
         // Clear error message if no issues
         setError('');
 
-        // Navigate to the student dashboard (or any other page based on role)
+        // Redirect based on role
         if (role === 'student') {
-            navigate('/student-dashboard');
-        } else {
-            // Redirect based on other roles (lecturer, registrar)
-            // navigate('/dashboard'); // Example for lecturers/registrars
+            navigate('/studentDashboard');
+        } else if (role === 'lecturer') {
+            navigate('/LecturerDashboard');
+        } else if (role === 'registrar') {
+            navigate('/AcademicRegistrarDashboard'); // Redirect registrar to their dashboard
         }
     };
 
@@ -219,4 +220,4 @@ function RegisterPage() {
     );
 }
 
-export default RegisterPage;
+export default Register;
