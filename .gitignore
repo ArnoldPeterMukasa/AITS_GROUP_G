@@ -9,6 +9,7 @@
 venv/
 myworld/
 __pycache__/
+.env
 
 # Testing
 .coverage
