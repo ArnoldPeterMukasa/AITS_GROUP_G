@@ -165,6 +165,19 @@ html {
     display: flex;
     justify-content: center;
     margin-top: 60px;
+    background-color: #2C3E50;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
 }
 
 .footer-buttons {
@@ -185,6 +198,12 @@ html {
 .footer-button:hover {
     background-color: #005bb5;
     transform: scale(1.05);
+}
+
+.footer-info {
+    font-size: 0.9rem;
+    text-align: center;
+    color: #ccc;
 }
 
 /* Responsiveness */
@@ -209,6 +228,19 @@ html {
 
     .intro p {
         font-size: 1rem;
+    }
+
+    .footer-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-buttons {
+        margin-bottom: 10px;
+    }
+
+    .footer-info {
+        margin-top: 10px;
     }
 }
 
