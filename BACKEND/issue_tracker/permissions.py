@@ -1,13 +1,13 @@
 from rest_framework import permissions
 
-class IsStudent(permissions.BasePermissiob):
+class IsStudent(permissions.BasePermission):
     def has_permission(self,request,view):
-        return request.user.is_authenticated and reque  st.user.user_type == 'student'
+        return request.user.is_authenticated and request.user.user_type == 'student'
 
-class IsLecturer(permissions.BasePermissions):
+class IsLecturer(permissions.BasePermission):
     def has_permission(self,request,view):
         return request.user.is_authenticated and request.user.user_type == 'lecturer'
 
-class IsRegistrar(permissions.BasePermissions):
+class IsRegistrar(permissions.BasePermission):
     def has_permission(self,request,view):
         return request.user.is_authenticated and request.user.user_type == 'registrar'
