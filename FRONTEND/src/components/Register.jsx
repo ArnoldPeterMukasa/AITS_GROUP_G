@@ -1,49 +1,136 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Register.css';
 
 function RegisterPage() {
+    const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: '',
+        registrationNumber: '',
+        college: '',
+        course: '',
+    });
+
+    const handleChange = (event) => {
+        const { id, value } = event.target;
+        setFormData((prevData) => ({
+            ...prevData,
+            [id]: value,
+        }));
+    };
+
     const handleSubmit = (event) => {
         event.preventDefault();
-        // Handle registration logic here
+
+        // Validate form data
+        if (formData.password !== formData.confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+        }
+
+        // Check if the role is "student"
+        if (formData.role === 'student') {
+            // Navigate to the StudentDashboard and pass user data
+            navigate('/studentdashboard', {
+                state: {
+                    user: {
+                        name: `${formData.firstName} ${formData.lastName}`,
+                        program: formData.course,
+                        pendingIssues: [], // You can add default pending issues here
+                    },
+                },
+            });
+        } else {
+            alert('Only students can access the Student Dashboard.');
+        }
     };
 
     return (
         <div className="register-container">
             <h2>Register</h2>
-            <p>Already have an account? <a href="">Login</a></p>
+            <p>
+                Already have an account? <Link to="/login">Login</Link>
+            </p>
             <form onSubmit={handleSubmit}>
                 <div className="form-row">
                     <div className="form-group">
                         <label htmlFor="firstName">First Name:</label>
-                        <input type="text" id="firstName" required />
+                        <input
+                            type="text"
+                            id="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                     <div className="form-group">
                         <label htmlFor="lastName">Last Name:</label>
-                        <input type="text" id="lastName" required />
+                        <input
+                            type="text"
+                            id="lastName"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                 </div>
                 <div className="form-group">
                     <label htmlFor="username">Username:</label>
-                    <input type="text" id="username" required />
+                    <input
+                        type="text"
+                        id="username"
+                        value={formData.username}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
-                    <input type="email" id="email" required />
+                    <input
+                        type="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
                 <div className="form-row">
                     <div className="form-group">
                         <label htmlFor="password">Password:</label>
-                        <input type="password" id="password" required />
+                        <input
+                            type="password"
+                            id="password"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password:</label>
-                        <input type="password" id="confirmPassword" required />
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                        />
                     </div>
                 </div>
                 <div className="form-group">
                     <label htmlFor="role">Role:</label>
-                    <select id="role" required>
+                    <select
+                        id="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        required
+                    >
                         <option value="">Select Role</option>
                         <option value="student">Student</option>
                         <option value="lecturer">Lecturer</option>
@@ -52,21 +139,41 @@ function RegisterPage() {
                 </div>
                 <div className="form-group">
                     <label htmlFor="registrationNumber">Student/Registration Number:</label>
-                    <input type="text" id="registrationNumber" required />
+                    <input
+                        type="text"
+                        id="registrationNumber"
+                        value={formData.registrationNumber}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="college">College:</label>
-                    <input type="text" id="college" required />
+                    <input
+                        type="text"
+                        id="college"
+                        value={formData.college}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
                 <div className="form-group">
                     <label htmlFor="course">Course:</label>
-                    <input type="text" id="course" required />
+                    <input
+                        type="text"
+                        id="course"
+                        value={formData.course}
+                        onChange={handleChange}
+                        required
+                    />
                 </div>
                 <button type="submit">Register</button>
-                <p>Already have an account? <Link to="/login">Login</Link></p>
+                <p>
+                    Already have an account? <Link to="/login">Login</Link>
+                </p>
             </form>
         </div>
-    );
-}
-
-export default RegisterPage;
+          );
+        }
+        
+        export default RegisterPage;
