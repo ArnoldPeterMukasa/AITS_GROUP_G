@@ -51,7 +51,7 @@ class LogoutView(APIView):
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsRegistrar] # Only Registrar can access
 
 # Create and List Issues
 class IssueListCreateView(generics.ListCreateAPIView):
