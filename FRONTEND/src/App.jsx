@@ -1,12 +1,8 @@
-import Home from "./components/Home";
-import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/Register";
+import { Outlet } from "react-router-dom";
 function App() {
   return (
     <div>
-      <Home />
-      <LoginPage />
-      <RegisterPage/>
+    <Outlet/>
     </div>
   );
 }
