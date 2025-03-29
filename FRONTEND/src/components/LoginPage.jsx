@@ -2,7 +2,7 @@
 import React from "react";
 import { useState } from "react";
 
-import React, { useState } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
 
 import "./LoginPage.css";
@@ -60,23 +60,7 @@ function LoginPage() {
                         onChange={(e) => setUsername(e.target.value)}
                         required  />
                         </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password:</label>
-                    <input type="password" id="password" value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required/>
                 
-                
-=======
-                    <label htmlFor="username">Username (or ID):</label>
-                    <input
-                        type="text"
-                        id="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </div>
 
                 <div className="form-group">
                     <label htmlFor="password">Password:</label>

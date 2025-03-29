@@ -4,18 +4,21 @@ import "./StudentDashboard.css";
 
 function StudentDashboard() {
     const location = useLocation();
-    const { user } = location.state || {}; 
-    
+    const { user } = location.state || {};
 
     return (
         <div className="dashboard-container">
-            <div className="sidebar">
-                <h3>Menu</h3>
-                <ul>
-                    <li>Program</li>
-                    <li>Pending Issues</li>
-                </ul>
-            </div>
+            {/* Header Section */}
+            <nav className="dashboard-header">
+                <h1>Student Dashboard</h1>
+                <div className="header-actions">
+                    <button className="header-button">Inbox</button>
+                    <button className="header-button">Unread Messages</button>
+                    <button className="header-button">Notifications</button>
+                </div>
+            </nav>
+
+            {/* Content Section */}
             <div className="content">
                 <h1>Welcome, {user?.name || "Student"}</h1>
                 <div className="section">
