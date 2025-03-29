@@ -1,5 +1,4 @@
-import React, { useState,useNavigate } from 'react';
-
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Register.css';
 
@@ -27,25 +26,6 @@ function RegisterPage() {
         }));
     };
 
-
-
-function Register() {
-    const navigate = useNavigate(); // Hook to navigate to another page
-    
-    const [role, setRole] = useState('student'); // Default role is 'student'
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [registrationNumber, setRegistrationNumber] = useState('');
-    const [college, setCollege] = useState('');
-    const [course, setCourse] = useState('');
-    const [department, setDepartment] = useState('');
-    const [roleSpecificInfo, setRoleSpecificInfo] = useState('');
-    const [error, setError] = useState('');
-
     const handleSubmit = (event) => {
         event.preventDefault();
 
@@ -55,64 +35,32 @@ function Register() {
             return;
         }
 
-        // Check if the role is "student"
+        // Redirect based on role
         if (formData.role === 'student') {
-            // Navigate to the StudentDashboard and pass user data
             navigate('/studentdashboard', {
                 state: {
                     user: {
                         name: `${formData.firstName} ${formData.lastName}`,
                         program: formData.course,
-                        pendingIssues: [], // You can add default pending issues here
+                        pendingIssues: [], // Default pending issues
                     },
                 },
             });
+        } else if (formData.role === 'lecturer') {
+            navigate('/lecturerdashboard');
+        } else if (formData.role === 'registrar') {
+            navigate('/academicregistrardashboard');
         } else {
-            alert('Only students can access the Student Dashboard.');
-
-        // Password Validation
-        if (password !== confirmPassword) {
-            setError("Passwords do not match");
-            return;
-        }
-
-        // Handle registration logic here (e.g., API call)
-        console.log("Form Submitted", {
-            firstName,
-            lastName,
-            username,
-            email,
-            password,
-            registrationNumber,
-            college,
-            course,
-            department,
-            role,
-        });
-
-        // Clear error message if no issues
-        setError('');
-
-        // Redirect based on role
-        if (role === 'student') {
-            navigate('/studentDashboard');
-        } else if (role === 'lecturer') {
-            navigate('/LecturerDashboard');
-        } else if (role === 'registrar') {
-            navigate('/AcademicRegistrarDashboard'); // Redirect registrar to their dashboard
+            alert('Please select a valid role.');
         }
     };
 
     return (
         <div className="register-container">
-
             <h2>Register</h2>
             <p>
                 Already have an account? <Link to="/login">Login</Link>
             </p>
-
-            <h2>Register for AITS</h2>
-            <p>Already have an account? <Link to="/login">Login</Link></p>
             <form onSubmit={handleSubmit}>
                 <div className="form-row">
                     <div className="form-group">
@@ -120,12 +68,8 @@ function Register() {
                         <input
                             type="text"
                             id="firstName"
-
-                            
-
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
-
+                            value={formData.firstName}
+                            onChange={handleChange}
                             required
                         />
                     </div>
@@ -134,82 +78,56 @@ function Register() {
                         <input
                             type="text"
                             id="lastName"
-
-                            
-
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
-
+                            value={formData.lastName}
+                            onChange={handleChange}
                             required
                         />
                     </div>
                 </div>
-
                 <div className="form-group">
                     <label htmlFor="username">Username:</label>
                     <input
                         type="text"
                         id="username"
-
-                        
-
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-
+                        value={formData.username}
+                        onChange={handleChange}
                         required
                     />
                 </div>
-
                 <div className="form-group">
                     <label htmlFor="email">Email:</label>
                     <input
                         type="email"
                         id="email"
-
-                        
-
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-
+                        value={formData.email}
+                        onChange={handleChange}
                         required
                     />
                 </div>
-
                 <div className="form-row">
                     <div className="form-group">
                         <label htmlFor="password">Password:</label>
                         <input
                             type="password"
                             id="password"
-
-                            
-
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            value={formData.password}
+                            onChange={handleChange}
                             required
                             minLength="8"
                             placeholder="Must be at least 8 characters"
-
                         />
                     </div>
-
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password:</label>
                         <input
                             type="password"
                             id="confirmPassword"
-
                             value={formData.confirmPassword}
-                            
-
-                            
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-
+                            onChange={handleChange}
                             required
                         />
                     </div>
                 </div>
-
                 <div className="form-group">
                     <label htmlFor="role">Role:</label>
                     <select
@@ -219,18 +137,11 @@ function Register() {
                         required
                     >
                         <option value="">Select Role</option>
-
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        required
-                    
-
                         <option value="student">Student</option>
                         <option value="lecturer">Lecturer</option>
                         <option value="registrar">Registrar</option>
                     </select>
                 </div>
-
                 <div className="form-group">
                     <label htmlFor="registrationNumber">Student/Registration Number:</label>
                     <input
@@ -267,10 +178,7 @@ function Register() {
                 </p>
             </form>
         </div>
-          );
-            }
-        }}
-        
-        export default RegisterPage;
+    );
+}
 
-
+export default RegisterPage;
