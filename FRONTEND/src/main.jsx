@@ -7,9 +7,13 @@ import App from './App.jsx';
 import Home from './components/Home.jsx';
 import LoginPage from './components/LoginPage.jsx';
 import Register from './components/Register.jsx';
+
 import LecturerDashboard from './components/LecturerDashboard.jsx';
 import StudentDashboard from './components/StudentDashboard.jsx';
 
+
+
+import AcademicRegistrarDashboard from './components/AcademicRegistrarDashboard.jsx';
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
@@ -18,9 +22,14 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route index element ={<Home/>} />
         <Route path="/login" element={<LoginPage/>} />
         <Route path="/register" element={<Register/>} />
+
         <Route path="/app" element={<App/>} />
-        <Route path="/lecturerdashboard" element={<LecturerDashboard/>} />
-        <Route path="/studentdashboard" element={<StudentDashboard/>} />  
+        <Route path="/LecturerDashboard" element={<LecturerDashboard/>} />
+        
+
+        <Route path="/StudentDashboard" element={<StudentDashboard/>}/>
+        <Route path = "/AcademicRegistrarDashboard" element={<AcademicRegistrarDashboard/>}/>
+
       </Routes>
     </Router>
   </React.StrictMode>,
