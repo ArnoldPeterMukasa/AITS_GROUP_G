@@ -49,6 +49,13 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
+
+
+    def validate_user_type(self, value):
+        valid_types = ['student', 'lecturer','registrar']
+        if value not in valid_types:
+            raise serializers.ValidationError("Invalid user_type. Must be student, lecturer,  or registrar.")
+        return value    
         
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
