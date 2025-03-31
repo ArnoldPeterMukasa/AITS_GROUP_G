@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './AcademicRegistrarDashboard.css'; // Include CSS file for styling
+import ManageUsersPage from './ManageUsersPage';
 
 function AcademicRegistrarDashboard() {
     const [issues, setIssues] = useState([]);
-    // Removed unused categories state
     const [analytics, setAnalytics] = useState({
         avgResolutionTime: 0,
         unresolvedIssues: 0,
@@ -15,21 +15,19 @@ function AcademicRegistrarDashboard() {
         course: '',
         status: 'all',
     });
-
+    const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
+    const navigate = useNavigate();
 
     // Sample data (could come from an API)
     useEffect(() => {
-        // Simulate fetching issues and analytics
         setIssues([
             { id: 1, title: "Issue with course materials", status: "open", category: "student", department: "Math", course: "Calculus 101" },
             { id: 2, title: "Lecturer request for more hours", status: "resolved", category: "lecturer", department: "Computer Science", course: "Data Structures" },
             { id: 3, title: "Urgent technical issue", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
         ]);
 
-        // Removed unused categories initialization
-
         setAnalytics({
-            avgResolutionTime: 5,  // average resolution time in days
+            avgResolutionTime: 5,
             unresolvedIssues: 2,
             totalIssues: 3
         });
@@ -48,18 +46,20 @@ function AcademicRegistrarDashboard() {
     });
 
     const resolveIssue = (id) => {
-        // Logic to resolve the issue (this would update the database/API in a real scenario)
         setIssues(prevIssues => prevIssues.map(issue => issue.id === id ? { ...issue, status: 'resolved' } : issue));
     };
 
     const escalateIssue = (id) => {
-        // Logic to escalate an issue
         alert(`Issue ${id} escalated.`);
     };
 
     const reassignIssue = (id) => {
-        // Logic to reassign an issue
         alert(`Issue ${id} reassigned.`);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem("authToken"); // Clear token
+        navigate("/login"); // Navigate to the login page
     };
 
     return (
@@ -68,15 +68,17 @@ function AcademicRegistrarDashboard() {
                 <h2>Dashboard</h2>
                 <ul>
                     <li><Link to="/AcademicRegistrarDashboard">Home</Link></li>
-                    <li><Link to="/manage-users">Manage Users</Link></li>
-                    <li><Link to="/reports">Reports</Link></li>
-                    <li><Link to="/logout">Logout</Link></li>
+                    <li><Link to="/manageUsersPage">Manage Users</Link></li>
+                    <li><Link to="/ReportsPage">Reports</Link></li>
+                    <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
+                    <li><Link to="/Settings">Settings</Link></li>
+                    <li><button onClick={handleLogout}>Logout</button></li>
                 </ul>
             </div>
 
             <div className="content">
                 <h1>Academic Registrar Dashboard</h1>
-                
+
                 <div className="overview">
                     <div className="card">
                         <h3>Total Issues</h3>

@@ -1,23 +1,14 @@
-
-import React from "react";
-import { useState } from "react";
-
-
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import "./LoginPage.css";
 
 function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-
-
     const [rememberMe, setRememberMe] = useState(false);
     const [error, setError] = useState(null);
 
-    const navigate = useNavigate(); // Hook to navigate after successful login
-
-    // Handle login form submission
+    const navigate = useNavigate();
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -31,19 +22,20 @@ function LoginPage() {
         // Clear any previous error
         setError(null);
 
-        // Handle the actual login logic here (e.g., API call)
-        console.log("Form Submitted", { username, password, rememberMe });
+        // This is where you would normally call an API to get the user's data and role
+        // For example, fetching from the backend:
+        // const user = await api.login(username, password);
 
-        // For now, let's assume we get the role from the login process (could come from an API)
-        const userRole = "registrar"; // Example hardcoded role for registrar
+        // Here, assume that you get the user data, including the role
+        const userRole = localStorage.getItem("role"); // Or fetched dynamically from backend
 
-        // Redirect to the correct dashboard based on role
-        if (userRole === 'Registrar') {
-            navigate("/AcademicRegistrarDashboard");
-        } else if (userRole === 'Student') {
+        // Check role and navigate to the respective dashboard
+        if (userRole === 'student') {
             navigate("/StudentDashboard");
-        } else if (userRole === 'Lecturer') {
+        } else if (userRole === 'lecturer') {
             navigate("/LecturerDashboard");
+        } else if (userRole === 'registrar') {
+            navigate("/AcademicRegistrarDashboard");
         } else {
             setError("Invalid role or credentials");
         }
@@ -54,14 +46,15 @@ function LoginPage() {
             <h2>Academic Issue Tracking System</h2>
             <form onSubmit={handleSubmit}>
                 <div className="form-group">
-
                     <label htmlFor="username">Username:</label>
-                    <input type="text" id="username" value={username}
+                    <input
+                        type="text"
+                        id="username"
+                        value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        required  />
-                        </div>
-                
-
+                        required
+                    />
+                </div>
                 <div className="form-group">
                     <label htmlFor="password">Password:</label>
                     <input
@@ -75,7 +68,6 @@ function LoginPage() {
                     />
                     <small>Password must be at least 8 characters long.</small>
                 </div>
-
                 <div className="form-group remember-me">
                     <input
                         type="checkbox"
@@ -84,7 +76,6 @@ function LoginPage() {
                         onChange={() => setRememberMe(!rememberMe)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-
                 </div>
 
                 {error && <p className="error">{error}</p>}

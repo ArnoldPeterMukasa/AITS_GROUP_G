@@ -20,9 +20,11 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/register" element={<Register/>} />
         <Route path="/app" element={<App/>} />
         <Route path="/StudentDashboard" element={<StudentDashboard/>}/>
-        <Route path = "/AcademicRegistrarDashboard" element={<AcademicRegistrarDashboard/>}/>
-        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
-
+        <Route path = "/AcademicRegistrarDashboard/*" element={<AcademicRegistrarDashboard/>}/>
+        <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
+        <Route path="/Settings" element={<Settings />} />
+        <Route path="/Notifications" element={<Notifications />} />
+        <Route path = "/ReportsPage" element={<ReportsPage/>}/>
       </Routes>
     </Router>
   </React.StrictMode>,
