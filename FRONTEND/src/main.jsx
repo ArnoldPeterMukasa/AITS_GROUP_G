@@ -9,6 +9,10 @@ import LoginPage from './components/LoginPage.jsx';
 import Register from './components/Register.jsx';
 import StudentDashboard from './components/StudentDashboard.jsx';
 import AcademicRegistrarDashboard from './components/AcademicRegistrarDashboard.jsx';
+import ManageUsersPage from './components/ManageUsersPage.jsx';
+import Settings from './components/Settings.jsx';
+import Notifications from './components/Notifications.jsx';
+import ReportsPage from './components/ReportsPage.jsx';
 import LecturerDashboard from './components/LecturerDashboard.jsx';
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
@@ -24,7 +28,8 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
         <Route path="/Settings" element={<Settings />} />
         <Route path="/Notifications" element={<Notifications />} />
-        <Route path = "/ReportsPage" element={<ReportsPage/>}/>
+        <Route path="/ReportsPage" element={<ReportsPage />} />
+        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
       </Routes>
     </Router>
   </React.StrictMode>,
