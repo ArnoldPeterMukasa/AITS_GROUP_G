@@ -88,7 +88,7 @@ This project is licensed under the **MIT License**.
 - **Collin Linus**
 
 
-- Open for collaboration! Feel free to fork and contribute. 🚀
+- Open for collaboration! Feel free to fork and contribute. 
 
 ## 📬 Contact
 For questions or contributions, reach out via [info.ap.mukasa@gmail.com].
