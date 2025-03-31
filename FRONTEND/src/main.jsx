@@ -28,7 +28,8 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
         <Route path="/Settings" element={<Settings />} />
         <Route path="/Notifications" element={<Notifications />} />
-        <Route path = "/ReportsPage" element={<ReportsPage/>}/>
+        <Route path="/ReportsPage" element={<ReportsPage />} />
+        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
         <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
       </Routes>
     </Router>
