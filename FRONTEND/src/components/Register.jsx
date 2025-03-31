@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import './Register.css';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./Register.css";
 
 function RegisterPage() {
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        role: '',
-        registrationNumber: '',
-        college: '',
-        course: '',
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        role: "",
+        registrationNumber: "",
+        college: "",
+        course: "",
+        lecturerId: "", // Added for lecturer
+        academicTitle: "", // Added for registrar
     });
 
     const handleChange = (event) => {
@@ -31,13 +33,16 @@ function RegisterPage() {
 
         // Validate form data
         if (formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match!');
+            alert("Passwords do not match!");
             return;
         }
 
+        // Store role in localStorage (or send this info to your backend)
+        localStorage.setItem("role", formData.role);
+
         // Redirect based on role
-        if (formData.role === 'student') {
-            navigate('/studentdashboard', {
+        if (formData.role === "student") {
+            navigate("/studentdashboard", {
                 state: {
                     user: {
                         name: `${formData.firstName} ${formData.lastName}`,
@@ -46,12 +51,12 @@ function RegisterPage() {
                     },
                 },
             });
-        } else if (formData.role === 'lecturer') {
-            navigate('/lecturerdashboard');
-        } else if (formData.role === 'registrar') {
-            navigate('/academicregistrardashboard');
+        } else if (formData.role === "lecturer") {
+            navigate("/lecturerdashboard");
+        } else if (formData.role === "registrar") {
+            navigate("/academicregistrardashboard");
         } else {
-            alert('Please select a valid role.');
+            alert("Please select a valid role.");
         }
     };
 
@@ -128,6 +133,7 @@ function RegisterPage() {
                         />
                     </div>
                 </div>
+
                 <div className="form-group">
                     <label htmlFor="role">Role:</label>
                     <select
@@ -142,36 +148,69 @@ function RegisterPage() {
                         <option value="registrar">Registrar</option>
                     </select>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="registrationNumber">Student/Registration Number:</label>
-                    <input
-                        type="text"
-                        id="registrationNumber"
-                        value={formData.registrationNumber}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="college">College:</label>
-                    <input
-                        type="text"
-                        id="college"
-                        value={formData.college}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="course">Course:</label>
-                    <input
-                        type="text"
-                        id="course"
-                        value={formData.course}
-                        onChange={handleChange}
-                        required
-                    />
-                </div>
+
+                {/* Role-Specific Inputs */}
+                {formData.role === "student" && (
+                    <>
+                        <div className="form-group">
+                            <label htmlFor="registrationNumber">Student/Registration Number:</label>
+                            <input
+                                type="text"
+                                id="registrationNumber"
+                                value={formData.registrationNumber}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="college">College:</label>
+                            <input
+                                type="text"
+                                id="college"
+                                value={formData.college}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="course">Course:</label>
+                            <input
+                                type="text"
+                                id="course"
+                                value={formData.course}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+                    </>
+                )}
+
+                {formData.role === "lecturer" && (
+                    <div className="form-group">
+                        <label htmlFor="lecturerId">Lecturer ID:</label>
+                        <input
+                            type="text"
+                            id="lecturerId"
+                            value={formData.lecturerId}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                )}
+
+                {formData.role === "registrar" && (
+                    <div className="form-group">
+                        <label htmlFor="academicTitle">Academic Title:</label>
+                        <input
+                            type="text"
+                            id="academicTitle"
+                            value={formData.academicTitle}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+                )}
+
                 <button type="submit">Register</button>
                 <p>
                     Already have an account? <Link to="/login">Login</Link>
