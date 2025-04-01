@@ -95,6 +95,7 @@ class LoginView(APIView):
             })
         return Response(serializer.errors, status=400)  
     
+    
 #Logout user
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
