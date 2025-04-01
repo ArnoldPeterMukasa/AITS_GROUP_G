@@ -1,0 +1,116 @@
+/* Basic Styling */
+.assignments-container {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* Upload Assignment Section */
+.upload-assignment {
+    margin-bottom: 30px;
+}
+
+.upload-assignment input,
+.upload-assignment textarea,
+.upload-assignment select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.upload-assignment button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.upload-assignment button:hover {
+    background-color: #45a049;
+}
+
+/* Uploaded Assignments Table */
+.uploaded-assignments table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.uploaded-assignments th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.uploaded-assignments th {
+    background-color: #f4f4f4;
+}
+
+/* Marks Upload Section */
+.upload-marks {
+    margin-top: 30px;
+}
+
+.upload-marks input {
+    padding: 10px;
+    font-size: 16px;
+}
+
+.marks-input {
+    margin-bottom: 15px;
+}
+
+/* Notification */
+.notification {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .upload-assignment input,
+    .upload-assignment textarea,
+    .upload-assignment select {
+        font-size: 14px;
+    }
+
+    .upload-assignment button {
+        font-size: 14px;
+    }
+
+    .uploaded-assignments table {
+        font-size: 14px;
+    }
+
+    .marks-input input {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-assignment input,
+    .upload-assignment textarea,
+    .upload-assignment select {
+        font-size: 12px;
+    }
+
+    .upload-assignment button {
+        font-size: 12px;
+    }
+
+    .uploaded-assignments table {
+        font-size: 12px;
+    }
+
+    .marks-input input {
+        font-size: 12px;
+    }
+}

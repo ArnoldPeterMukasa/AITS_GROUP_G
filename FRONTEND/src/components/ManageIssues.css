@@ -1,0 +1,69 @@
+/* Basic Layout */
+.manage-issues-container {
+    padding: 20px;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+.controls input,
+.controls select {
+    margin-right: 10px;
+    padding: 8px;
+    font-size: 16px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+button {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .controls input,
+    .controls select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    table th, td {
+        font-size: 14px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    table th, td {
+        font-size: 12px;
+        padding: 6px;
+    }
+
+    button {
+        padding: 6px 10px;
+    }
+}

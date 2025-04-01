@@ -14,6 +14,11 @@ import Settings from './components/Settings.jsx';
 import Notifications from './components/Notifications.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
 import LecturerDashboard from './components/LecturerDashboard.jsx';
+import ManageIssues from './components/ManageIssues.jsx';
+import Assignments from './Assignments.jsx';
+import CourseContent from './CourseContent.jsx';
+
+
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
@@ -31,6 +36,11 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/ReportsPage" element={<ReportsPage />} />
         <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
         <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
+        <Route path="/ManageIssues" element={<ManageIssues/>}/>
+        <Route path="/Assignments" element={<Assignments/>}/>
+        <Route path="/CourseContent" element={<CourseContent/>}/>
+   
+        
       </Routes>
     </Router>
   </React.StrictMode>,
