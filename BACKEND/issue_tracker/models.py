@@ -6,7 +6,7 @@ from django.contrib.auth.models import AbstractUser
 # Custom User Model
 class User(AbstractUser):
     USER_TYPES = [
-        ('student', 'Student'),
+        ('student', 'student'),
         ('lecturer', 'Lecturer'),
         ('hod', 'Head of Department'),
         ('registrar', 'Academic Registrar'),

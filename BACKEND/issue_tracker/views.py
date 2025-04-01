@@ -19,6 +19,8 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
     
+
+    
     
 #user login
 class LoginView(APIView):
