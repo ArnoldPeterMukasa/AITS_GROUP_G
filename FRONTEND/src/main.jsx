@@ -14,6 +14,7 @@ import Settings from './components/Settings.jsx';
 import Notifications from './components/Notifications.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
 import LecturerDashboard from './components/LecturerDashboard.jsx';
+import Inbox from './components/Inbox.jsx'; 
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
@@ -30,7 +31,8 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/Notifications" element={<Notifications />} />
         <Route path="/ReportsPage" element={<ReportsPage />} />
         <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
-        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
+        
+        <Route path="/inbox" element={<Inbox />} /> 
       </Routes>
     </Router>
   </React.StrictMode>,
