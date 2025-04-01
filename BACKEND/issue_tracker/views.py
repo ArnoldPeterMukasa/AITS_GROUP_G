@@ -153,8 +153,4 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
 
-#  Get Audit Logs (Only Admin can view)
-class AuditTrailListView(generics.ListAPIView):
-    queryset = AuditTrail.objects.all()
-    serializer_class = AuditTrailSerializer
-    permission_classes = [permissions.IsAuthenticated, IsRegistrar]  # Only Registrar can access
+
