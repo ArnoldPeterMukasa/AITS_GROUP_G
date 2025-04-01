@@ -31,11 +31,19 @@ function RegisterPage() {
     const handleSubmit = (event) => {
         event.preventDefault();
 
+
         // Validate form data
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
+
+        if (formData.password !== formData.confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+        }
+    
+        
 
         // Store role in localStorage (or send this info to your backend)
         localStorage.setItem("role", formData.role);
@@ -46,6 +54,8 @@ function RegisterPage() {
                 state: {
                     user: {
                         name: `${formData.firstName} ${formData.lastName}`,
+                        email: formData.email,
+                        registrationNumber: formData.registrationNumber,
                         program: formData.course,
                         pendingIssues: [], // Default pending issues
                     },
