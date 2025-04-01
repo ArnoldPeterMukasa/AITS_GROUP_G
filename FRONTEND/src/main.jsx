@@ -19,13 +19,19 @@ import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx';
 
 
+import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
+import VerificationCodePage from './components/VerificationCodePage.jsx';
+import ResetPasswordPage from './components/ResetPasswordPage.jsx';
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
     <Router>
       <Routes>
         <Route index element ={<Home/>} />
-        <Route path="/login" element={<LoginPage/>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify-code" element={<VerificationCodePage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/register" element={<Register/>} />
         <Route path="/app" element={<App/>} />
         <Route path="/StudentDashboard" element={<StudentDashboard/>}/>
@@ -40,6 +46,7 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/Assignments" element={<Assignments/>}/>
         <Route path="/CourseContent" element={<CourseContent/>}/>
    
+        <Route path="/LecturerDashboard" element={<LecturerDashboard />} />
         
       </Routes>
     </Router>
