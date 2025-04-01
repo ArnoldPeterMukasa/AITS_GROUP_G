@@ -8,7 +8,6 @@ class User(AbstractUser):
     USER_TYPES = [
         ('student', 'student'),
         ('lecturer', 'Lecturer'),
-        ('hod', 'Head of Department'),
         ('registrar', 'Academic Registrar'),
     ]
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
@@ -45,6 +44,14 @@ class Issue(models.Model):
 
 
 # Comment Model
+class Comment(models.Model):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comments')
+    commented_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.commented_by.username} on {self.issue.title}"
 
 
 #  Notification Model
@@ -60,4 +67,9 @@ class Notification(models.Model):
 
 
 #  Audit Trail Model (Logs actions performed on issues)
+class AuditTrail(models.Model):
+    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='audit_logs')
+    action_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    action_description = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
