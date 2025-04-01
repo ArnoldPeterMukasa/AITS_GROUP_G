@@ -13,15 +13,16 @@ import ManageUsersPage from './components/ManageUsersPage.jsx';
 import Settings from './components/Settings.jsx';
 import Notifications from './components/Notifications.jsx';
 import ReportsPage from './components/ReportsPage.jsx';
+import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
+import VerificationCodePage from './components/VerificationCodePage.jsx';
+import ResetPasswordPage from './components/ResetPasswordPage.jsx';
+
 import LecturerDashboard from './components/LecturerDashboard.jsx';
 import ManageIssues from './components/ManageIssues.jsx';
 import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx';
 
 
-import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
-import VerificationCodePage from './components/VerificationCodePage.jsx';
-import ResetPasswordPage from './components/ResetPasswordPage.jsx';
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
@@ -40,13 +41,12 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/Settings" element={<Settings />} />
         <Route path="/Notifications" element={<Notifications />} />
         <Route path="/ReportsPage" element={<ReportsPage />} />
-        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
-        <Route path="/LecturerDashboard" element={<LecturerDashboard/>}/>
+        <Route path="/LecturerDashboard" element={<LecturerDashboard />} />
         <Route path="/ManageIssues" element={<ManageIssues/>}/>
         <Route path="/Assignments" element={<Assignments/>}/>
         <Route path="/CourseContent" element={<CourseContent/>}/>
    
-        <Route path="/LecturerDashboard" element={<LecturerDashboard />} />
+        
         
       </Routes>
     </Router>
