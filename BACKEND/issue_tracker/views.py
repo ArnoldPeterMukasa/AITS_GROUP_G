@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import Issue, Comment, Notification, AuditTrail
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, CommentSerializer, NotificationSerializer, AuditTrailSerializer
+from .models import Issue, Notification
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
-
+from django.db.models import Avg, Q
+from datetime import timedelta, datetime
 from django.core.mail import send_mail
 
 
@@ -18,9 +19,65 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
-    
+class RegistrarDashboardView(APIView):
+    def get(self, request):
+        # Extract query parameters from frontend
+        department = request.query_params.get('department')
+        course = request.query_params.get('course')
+        status = request.query_params.get('status')
 
-    
+        # Query issues
+        issues = Issue.objects.all()
+
+        # Apply filters dynamically
+        if department:
+            issues = issues.filter(reported_by__department=department)
+        if course:
+            issues = issues.filter(category=course)  # Assuming "course" maps to "category"
+        if status and status.lower() != 'all':
+            issues = issues.filter(status=status)
+
+        # Dashboard analytics
+        total_issues = issues.count()
+        unresolved_issues = issues.filter(~Q(status='resolved')).count()
+        avg_time = issues.aggregate(avg_time=Avg('updated_at'))['avg_time']
+        avg_resolution_time = avg_time.days if avg_time else 0
+
+        # Overdue issues (open for more than 7 days)
+        overdue_issues_count = issues.filter(
+            Q(status='open') & Q(created_at__lte=datetime.now() - timedelta(days=7))
+        ).count()
+
+        # Dynamic filters for dropdown options
+        departments = User.objects.values_list('department', flat=True).distinct()
+        categories = Issue.objects.values_list('category', flat=True).distinct()
+        statuses = ['open', 'in_progress', 'resolved', 'all']
+
+        # Serialize issues
+        serialized_issues = IssueSerializer(issues, many=True).data
+
+        # Fetch unread notifications
+        unread_notifications = Notification.objects.filter(is_read=False)
+        serialized_notifications = NotificationSerializer(unread_notifications, many=True).data
+
+        # Build and return the response
+        return Response({
+            'analytics': {
+                'totalIssues': total_issues,
+                'unresolvedIssues': unresolved_issues,
+                'avgResolutionTime': avg_resolution_time,
+                'overdueIssues': overdue_issues_count,
+            },
+            'issues': serialized_issues,
+            'notifications': serialized_notifications,
+            'filters': {
+                'departments': list(departments),
+                'categories': list(categories),
+                'statuses': statuses,
+            }
+        })
+
+ 
     
 #user login
 class LoginView(APIView):
@@ -37,6 +94,7 @@ class LoginView(APIView):
                 'user': UserSerializer(user).data             
             })
         return Response(serializer.errors, status=400)  
+    
     
 #Logout user
 class LogoutView(APIView):
@@ -86,16 +144,7 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
             message = f" hello {student.username},\n\n The status of your issue '{updated_issue.title}' has been updated to '{new_status}'."
             
             send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
-
-# List and Create Comments
-class CommentListCreateView(generics.ListCreateAPIView):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated] 
-
-    def perform_create(self, serializer):
-        serializer.save(commented_by=self.request.user)
-
+            
 #  Get User Notifications
 class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
@@ -104,8 +153,4 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
 
-#  Get Audit Logs (Only Admin can view)
-class AuditTrailListView(generics.ListAPIView):
-    queryset = AuditTrail.objects.all()
-    serializer_class = AuditTrailSerializer
-    permission_classes = [permissions.IsAuthenticated, IsRegistrar]  # Only Registrar can access
+

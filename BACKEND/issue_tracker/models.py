@@ -8,7 +8,6 @@ class User(AbstractUser):
     USER_TYPES = [
         ('student', 'student'),
         ('lecturer', 'Lecturer'),
-        ('hod', 'Head of Department'),
         ('registrar', 'Academic Registrar'),
     ]
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
@@ -74,5 +73,3 @@ class AuditTrail(models.Model):
     action_description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Audit Log: {self.action_by.username} - {self.timestamp}"

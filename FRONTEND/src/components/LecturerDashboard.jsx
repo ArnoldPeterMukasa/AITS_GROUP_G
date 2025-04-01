@@ -1,144 +1,146 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import "./LecturerDashboard.css";
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './LecturerDashboard.css'; // Include CSS file for styling
 
 function LecturerDashboard() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user } = location.state || {};
-
-  const [complaints, setComplaints] = useState([]);
-  const [marks, setMarks] = useState([]);
-  const [notifications, setNotifications] = useState([
-    "New complaint from student in Data Structures.",
-    "Reminder to grade student assignments in Mechanical Engineering.",
-  ]);
-
-  useEffect(() => {
-    // Simulating fetching complaints data and marks assigned
-    setComplaints([
-      { id: 1, student: "John Doe", complaint: "Issue with course material", status: "open" },
-      { id: 2, student: "Jane Smith", complaint: "Need extra class hours", status: "open" },
-      { id: 3, student: "Alice Johnson", complaint: "Technical difficulties", status: "open" },
+    const [issues, setIssues] = useState([]);
+    const [assignments, setAssignments] = useState([]);
+    const [notifications] = useState(["New assignment posted!", "Course content updated"]);
+    const [courseContent, setCourseContent] = useState([
+        { id: 1, title: "Lecture 1 - Introduction to Programming", dateUploaded: "2025-03-15" },
+        { id: 2, title: "Lecture 2 - Data Structures", dateUploaded: "2025-03-18" }
     ]);
+    const navigate = useNavigate();
 
-    setMarks([
-      { student: "John Doe", course: "Calculus 101", marks: 85 },
-      { student: "Jane Smith", course: "Data Structures", marks: 92 },
-    ]);
-  }, []);
+    // Sample data (could come from an API)
+    useEffect(() => {
+        setIssues([
+            { id: 1, title: "Issue with course materials", status: "open", department: "Computer Science", course: "Data Structures" },
+            { id: 2, title: "Assignment not uploading", status: "resolved", department: "Computer Science", course: "Programming 101" }
+        ]);
+        setAssignments([
+            { id: 1, title: "Assignment 1 - Introduction to Programming", dueDate: "2025-04-10" },
+            { id: 2, title: "Assignment 2 - Data Structures", dueDate: "2025-04-15" }
+        ]);
+    }, []);
 
-  const handleResolveComplaint = (complaintId) => {
-    setComplaints((prevComplaints) =>
-      prevComplaints.filter((complaint) => complaint.id !== complaintId) // Remove the resolved complaint
+    const handleLogout = () => {
+        localStorage.removeItem("authToken"); // Clear token
+        navigate("/login"); // Navigate to the login page
+    };
+
+    return (
+        <div className="dashboard-container">
+            <div className="sidebar">
+                <h2>Lecturer Dashboard</h2>
+                <ul>
+                    <li><Link to="/LecturerDashboard">Home</Link></li>
+                    <li><Link to="/ManageIssues">Manage Issues</Link></li>
+                    <li><Link to="/ReportsPage">Reports</Link></li>
+                    <li><Link to="/Assignments">Assignments</Link></li>
+                    <li><Link to="/CourseContent">Course Content</Link></li>
+                    <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
+                    <li><Link to="/Settings">Settings</Link></li>
+                    <li><button onClick={handleLogout}>Logout</button></li>
+                </ul>
+            </div>
+
+            <div className="content">
+                <h1>Welcome to the Lecturer Dashboard</h1>
+
+                {/* Home Section */}
+                <div className="overview">
+                    <h3>Recent Activities</h3>
+                    <div className="card">
+                        <h4>New Issues</h4>
+                        <p>{issues.filter(issue => issue.status === 'open').length} new issues</p>
+                    </div>
+                    <div className="card">
+                        <h4>Upcoming Assignments</h4>
+                        <p>{assignments.length} upcoming assignments</p>
+                    </div>
+                    <div className="card">
+                        <h4>Course Content Updates</h4>
+                        <p>{courseContent.length} new course materials uploaded</p>
+                    </div>
+                </div>
+
+                {/* Manage Issues */}
+                <div className="issues-list">
+                    <h3>Issues</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Course</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {issues.map(issue => (
+                                <tr key={issue.id}>
+                                    <td>{issue.title}</td>
+                                    <td>{issue.status}</td>
+                                    <td>{issue.course}</td>
+                                    <td>
+                                        {issue.status === "open" && (
+                                            <>
+                                                <button>Resolve</button>
+                                                <button>Escalate</button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Assignments Section */}
+                <div className="assignments-list">
+                    <h3>Assignments</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Due Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {assignments.map(assignment => (
+                                <tr key={assignment.id}>
+                                    <td>{assignment.title}</td>
+                                    <td>{assignment.dueDate}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Course Content Section */}
+                <div className="course-content-list">
+                    <h3>Course Content</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Date Uploaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {courseContent.map(content => (
+                                <tr key={content.id}>
+                                    <td>{content.title}</td>
+                                    <td>{content.dateUploaded}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     );
-    setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      `Complaint by student ${complaintId} has been resolved.`,
-    ]);
-  };
-
-  const handleAssignMarks = (studentName, course, marks) => {
-    setMarks((prevMarks) => [
-      ...prevMarks,
-      { student: studentName, course, marks: parseInt(marks) },
-    ]);
-    setNotifications((prevNotifications) => [
-      ...prevNotifications,
-      `Marks assigned to ${studentName} in ${course}.`,
-    ]);
-  };
-
-  const handleLogout = () => {
-    navigate("/login"); // Navigate to the login page when logged out
-  };
-
-  return (
-    <div className="dashboard-container">
-      {/* Navbar Section */}
-      <nav className="navbar">
-        <h2 className="navbar-title">Lecturer Dashboard</h2>
-        <ul className="navbar-links">
-          <li><button onClick={() => navigate("/home")}>Home</button></li>
-          <li><button onClick={() => navigate("/manage-issues")}>Manage Issues</button></li>
-          <li><button onClick={() => navigate("/reports")}>Reports</button></li>
-          <li><button onClick={handleLogout}>Logout</button></li>
-        </ul>
-      </nav>
-
-      {/* Content Section */}
-      <div className="content">
-        <h1>Welcome, {user?.name || "Lecturer"}</h1>
-
-        {/* Notifications Section */}
-        <div className="section">
-          <h2>Notifications</h2>
-          <ul>
-            {notifications.length > 0 ? (
-              notifications.map((notification, index) => (
-                <li key={index}>{notification}</li>
-              ))
-            ) : (
-              <p>No new notifications.</p>
-            )}
-          </ul>
-        </div>
-
-        {/* Complaints Section */}
-        <div className="section">
-          <h2>Pending Complaints</h2>
-          <ul>
-            {complaints.length > 0 ? (
-              complaints.map((complaint, index) => (
-                <li key={index}>
-                  {complaint.student}: {complaint.complaint} ({complaint.status}){" "}
-                  {complaint.status === "open" && (
-                    <button onClick={() => handleResolveComplaint(complaint.id)}>
-                      Resolve
-                    </button>
-                  )}
-                </li>
-              ))
-            ) : (
-              <p>No complaints to resolve.</p>
-            )}
-          </ul>
-        </div>
-
-        {/* Assign Marks Section */}
-        <div className="section">
-          <h2>Assign Marks</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleAssignMarks(
-                e.target.studentName.value,
-                e.target.course.value,
-                e.target.marks.value
-              );
-            }}
-          >
-            <input type="text" name="studentName" placeholder="Student Name" required />
-            <input type="text" name="course" placeholder="Course" required />
-            <input type="number" name="marks" placeholder="Marks" required />
-            <button type="submit">Assign Marks</button>
-          </form>
-          <h3>Assigned Marks</h3>
-          <ul>
-            {marks.length > 0 ? (
-              marks.map((mark, index) => (
-                <li key={index}>
-                  {mark.student} - {mark.course}: {mark.marks} marks
-                </li>
-              ))
-            ) : (
-              <p>No marks assigned yet.</p>
-            )}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default LecturerDashboard;
