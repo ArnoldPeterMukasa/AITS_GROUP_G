@@ -45,6 +45,11 @@ class AuditTrailSerializer(serializers.ModelSerializer):
 # User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    registration_number = serializers.CharField(required=False, allow_blank=True)
+    course = serializers.CharField(required=False, allow_blank=True)
+    lecturer_id = serializers.CharField(required=False, allow_blank=True)
+    academic_title = serializers.CharField(required=False, allow_blank=True)
+
     
     class Meta:
         model = User

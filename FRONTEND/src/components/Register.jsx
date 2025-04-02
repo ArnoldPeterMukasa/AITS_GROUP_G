@@ -28,62 +28,49 @@ function RegisterPage() {
             [id]: value,
         }));
     };
-
     const handleSubmit = async (event) => {
         event.preventDefault();
-
+    
         // Validate form data
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
-
-        // Prepare the data to send to the backend
-        const userData = {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            username: formData.username,
-            email: formData.email,
-            password: formData.password,
-            role: formData.role,
-            registration_number: formData.registrationNumber,
-            college: formData.college,
-            course: formData.course,
-            lecturer_id: formData.lecturerId,
-            academic_title: formData.academicTitle,
-        };
-
+    
         try {
-            // Send the data to the backend
-            const response = await axios.post("http://127.0.0.1:8000/api/register/", userData);
-            console.log("User registered successfully:", response.data);
-
-            // Store role in localStorage
-            localStorage.setItem("role", formData.role);
-
-            // Redirect based on role
-            if (formData.role === "student") {
-                navigate("/studentdashboard", {
-                    state: {
-                        user: {
-                            name: `${formData.firstName} ${formData.lastName}`,
-                            email: formData.email,
-                            registrationNumber: formData.registrationNumber,
-                            program: formData.course,
-                            pendingIssues: [], // Default pending issues
-                        },
-                    },
-                });
-            } else if (formData.role === "lecturer") {
-                navigate("/lecturerdashboard");
-            } else if (formData.role === "registrar") {
-                navigate("/academicregistrardashboard");
+            const response = await fetch("http://127.0.0.1:8000/api/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password,
+                    user_type: formData.role,
+                    department: formData.college, // Assuming "college" maps to "department"
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    registration_number: formData.registrationNumber,
+                    course: formData.course,
+                }),
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+                alert("Registration successful!");
+            } else {
+                const errorData = await response.json();
+                console.error("Error:", errorData);
+                alert(`Registration failed: ${JSON.stringify(errorData)}`);
             }
         } catch (error) {
-            console.error("Error registering user:", error.response?.data || error.message);
-            alert("Failed to register user. Please try again.");
+            console.error("Error during registration:", error);
+            alert("An error occurred. Please try again.");
         }
     };
+
+    
 
     return (
         <div className="register-container">
