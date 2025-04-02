@@ -12,7 +12,6 @@ import AcademicRegistrarDashboard from './components/AcademicRegistrarDashboard.
 import ManageUsersPage from './components/ManageUsersPage.jsx';
 import Settings from './components/Settings.jsx';
 import Notifications from './components/Notifications.jsx';
-import ReportsPage from './components/ReportsPage.jsx';
 import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
 import VerificationCodePage from './components/VerificationCodePage.jsx';
 import ResetPasswordPage from './components/ResetPasswordPage.jsx';
@@ -42,7 +41,6 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
         <Route path="/Settings" element={<Settings />} />
         <Route path="/Notifications" element={<Notifications />} />
-        <Route path="/ReportsPage" element={<ReportsPage />} />
 
         
         
