@@ -10,34 +10,55 @@ function LoginPage() {
 
     const navigate = useNavigate();
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-
+    
         // Basic validation
         if (!username || !password) {
             setError("Username and password are required.");
             return;
         }
-
+    
         // Clear any previous error
         setError(null);
-
-        // This is where you would normally call an API to get the user's data and role
-        // For example, fetching from the backend:
-        // const user = await api.login(username, password);
-
-        // Here, assume that you get the user data, including the role
-        const userRole = localStorage.getItem("role"); // Or fetched dynamically from backend
-
-        // Check role and navigate to the respective dashboard
-        if (userRole === 'student') {
-            navigate("/StudentDashboard");
-        } else if (userRole === 'lecturer') {
-            navigate("/LecturerDashboard");
-        } else if (userRole === 'registrar') {
-            navigate("/AcademicRegistrarDashboard");
-        } else {
-            setError("Invalid role or credentials");
+    
+        try {
+            // Send login data to the backend
+            const response = await fetch("http://127.0.0.1:8000/api/login/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
+    
+            if (response.ok) {
+                const data = await response.json();
+    
+                // Save user data (e.g., token, role) to localStorage or state
+                localStorage.setItem("token", data.token); // Assuming the backend returns a token
+                localStorage.setItem("role", data.role); // Assuming the backend returns the user's role
+    
+                // Navigate to the respective dashboard based on the user's role
+                if (data.role === "student") {
+                    navigate("/StudentDashboard");
+                } else if (data.role === "lecturer") {
+                    navigate("/LecturerDashboard");
+                } else if (data.role === "registrar") {
+                    navigate("/AcademicRegistrarDashboard");
+                } else {
+                    setError("Invalid role or credentials.");
+                }
+            } else {
+                const errorData = await response.json();
+                setError(errorData.message || "Invalid username or password.");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            setError("An error occurred. Please try again.");
         }
     };
 

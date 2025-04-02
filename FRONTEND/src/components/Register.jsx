@@ -28,6 +28,8 @@ function RegisterPage() {
             [id]: value,
         }));
     };
+
+
     const handleSubmit = async (event) => {
         event.preventDefault();
     
@@ -37,28 +39,40 @@ function RegisterPage() {
             return;
         }
     
+        // Prepare the request body based on the selected role
+        const requestBody = {
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            user_type: formData.role,
+            department: formData.college, // Assuming "college" maps to "department"
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            registration_number: formData.registrationNumber,
+            course: formData.course,
+        };
+    
+        if (formData.role === "lecturer") {
+            requestBody.lecturer_id = formData.lecturerId;
+        }
+    
+        if (formData.role === "registrar") {
+            requestBody.academic_title = formData.academicTitle;
+        }
+    
         try {
             const response = await fetch("http://127.0.0.1:8000/api/register/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    username: formData.username,
-                    email: formData.email,
-                    password: formData.password,
-                    user_type: formData.role,
-                    department: formData.college, // Assuming "college" maps to "department"
-                    first_name: formData.firstName,
-                    last_name: formData.lastName,
-                    registration_number: formData.registrationNumber,
-                    course: formData.course,
-                }),
+                body: JSON.stringify(requestBody),
             });
     
             if (response.ok) {
                 const data = await response.json();
                 alert("Registration successful!");
+                navigate("/login"); // Redirect to login page after successful registration
             } else {
                 const errorData = await response.json();
                 console.error("Error:", errorData);
@@ -69,9 +83,7 @@ function RegisterPage() {
             alert("An error occurred. Please try again.");
         }
     };
-
     
-
     return (
         <div className="register-container">
             <h2>Register</h2>
