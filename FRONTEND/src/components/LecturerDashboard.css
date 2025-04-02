@@ -1,29 +1,33 @@
+/* General Styles */
 .dashboard-container {
   display: flex;
   height: 100vh;
 }
+
 .sidebar {
   width: 250px;
   background-color: #f4f4f4;
   padding: 20px;
-  
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
 }
+
 .sidebar h2 {
   text-align: center;
   margin-bottom: 20px;
-  
 }
+
 .sidebar ul {
   list-style-type: none;
   padding: 0;
 }
+
 .sidebar ul li {
   margin-bottom: 15px;
 }
+
 .sidebar ul li a,
 .sidebar ul li button {
   text-decoration: none;
@@ -35,18 +39,19 @@
   text-align: left;
   border: none;
   background: none;
-
 }
+
 .sidebar ul li button {
   cursor: pointer;
 }
+
 .content {
   flex: 1;
   padding: 20px;
   background-color: #fff;
   overflow-y: auto;
-
 }
+
 .card {
   background-color: #f9f9f9;
   padding: 15px;
@@ -54,27 +59,34 @@
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
+
 .card h4 {
   margin-bottom: 10px;
   font-size: 18px;
 }
+
 .card p {
   font-size: 16px;
   color: #666;
 }
+
+/* Table Styles */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
+
 th, td {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
 }
+
 th {
   background-color: #f4f4f4;
 }
+
 button {
   padding: 8px 12px;
   background-color: #4CAF50;
@@ -83,6 +95,68 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
 button:hover {
   background-color: #45a049;
+}
+
+/* Media Queries for Responsiveness */
+
+/* When screen size is small (mobile or small tablets) */
+@media (max-width: 768px) {
+  .dashboard-container {
+      flex-direction: column;
+  }
+
+  .sidebar {
+      width: 100%;
+      position: static;
+      padding: 10px;
+  }
+
+  .sidebar ul li {
+      margin-bottom: 10px;
+  }
+
+  .content {
+      padding: 10px;
+  }
+
+  .card {
+      margin-bottom: 15px;
+  }
+
+  table th, table td {
+      font-size: 14px;
+      padding: 8px;
+  }
+
+  button {
+      padding: 6px 10px;
+  }
+}
+
+/* For very small screens (portrait phones) */
+@media (max-width: 480px) {
+  .sidebar {
+      width: 100%;
+      padding: 5px;
+  }
+
+  .sidebar ul li {
+      margin-bottom: 8px;
+  }
+
+  .card {
+      margin-bottom: 10px;
+  }
+
+  table th, table td {
+      font-size: 12px;
+      padding: 6px;
+  }
+
+  button {
+      padding: 5px 8px;
+  }
 }
