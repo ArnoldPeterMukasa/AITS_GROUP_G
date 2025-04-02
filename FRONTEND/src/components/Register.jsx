@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios"; // Import axios for API requests
 import "./Register.css";
 
 function RegisterPage() {
@@ -28,7 +29,7 @@ function RegisterPage() {
         }));
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         // Validate form data
@@ -37,26 +38,50 @@ function RegisterPage() {
             return;
         }
 
-        // Store role in localStorage (or send this info to your backend)
-        localStorage.setItem("role", formData.role);
+        // Prepare the data to send to the backend
+        const userData = {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            username: formData.username,
+            email: formData.email,
+            password: formData.password,
+            role: formData.role,
+            registration_number: formData.registrationNumber,
+            college: formData.college,
+            course: formData.course,
+            lecturer_id: formData.lecturerId,
+            academic_title: formData.academicTitle,
+        };
 
-        // Redirect based on role
-        if (formData.role === "student") {
-            navigate("/studentdashboard", {
-                state: {
-                    user: {
-                        name: `${formData.firstName} ${formData.lastName}`,
-                        program: formData.course,
-                        pendingIssues: [], // Default pending issues
+        try {
+            // Send the data to the backend
+            const response = await axios.post("http://127.0.0.1:8000/api/register/", userData);
+            console.log("User registered successfully:", response.data);
+
+            // Store role in localStorage
+            localStorage.setItem("role", formData.role);
+
+            // Redirect based on role
+            if (formData.role === "student") {
+                navigate("/studentdashboard", {
+                    state: {
+                        user: {
+                            name: `${formData.firstName} ${formData.lastName}`,
+                            email: formData.email,
+                            registrationNumber: formData.registrationNumber,
+                            program: formData.course,
+                            pendingIssues: [], // Default pending issues
+                        },
                     },
-                },
-            });
-        } else if (formData.role === "lecturer") {
-            navigate("/lecturerdashboard");
-        } else if (formData.role === "registrar") {
-            navigate("/academicregistrardashboard");
-        } else {
-            alert("Please select a valid role.");
+                });
+            } else if (formData.role === "lecturer") {
+                navigate("/lecturerdashboard");
+            } else if (formData.role === "registrar") {
+                navigate("/academicregistrardashboard");
+            }
+        } catch (error) {
+            console.error("Error registering user:", error.response?.data || error.message);
+            alert("Failed to register user. Please try again.");
         }
     };
 

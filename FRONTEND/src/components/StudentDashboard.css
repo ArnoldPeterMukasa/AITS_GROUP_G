@@ -1,3 +1,4 @@
+
 .dashboard-container {
     display: flex;
     height: 100vh;
@@ -9,7 +10,6 @@
 .dashboard-navbar {
     display: flex;
     flex-direction: column;
-    
     align-items: center;
     padding: 15px 20px;
     background: #bbdefb; /* Lighter blue for the navbar */
@@ -32,11 +32,12 @@
     width: 100%;
 }
 
-.navbar-button {
+/* Common button styles */
+.button {
     padding: 10px 15px;
-    background: #90caf9; 
-    color: white;
-    border: 5px;
+    background: #90caf9; /* Blue background */
+    color: white; /* White text */
+    border: none;
     border-radius: 5px;
     cursor: pointer;
     font-size: 1rem;
@@ -45,11 +46,11 @@
     width: 100%;
 }
 
-.navbar-button:hover {
-    background: #64b5f6; 
+.button:hover {
+    background: #64b5f6; /* Slightly darker blue on hover */
 }
 
-
+/* Content Section */
 .content {
     flex: 1;
     padding: 20px;
@@ -63,6 +64,29 @@
     color: #0d47a1; 
 }
 
+/* Profile Section */
+.profile-section {
+    margin-bottom: 20px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h2 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    color: #1565c0; /* Medium blue */
+    border-bottom: 2px solid #0d47a1; /* Dark blue border */
+    padding-bottom: 5px;
+}
+
+.profile-section p {
+    font-size: 1rem;
+    color: #0d47a1; /* Dark blue */
+}
+
+/* Section Styles */
 .section {
     margin-bottom: 20px;
     background: white;
@@ -77,11 +101,6 @@
     color: #1565c0; 
     border-bottom: 2px solid #0d47a1; 
     padding-bottom: 5px;
-}
-
-.section p {
-    font-size: 1rem;
-    color: #0d47a1; /* Dark blue */
 }
 
 .section ul {
@@ -100,4 +119,38 @@
 
 .section ul li:hover {
     background: #90caf9; /* Slightly darker light blue */
+}
+
+/* Notifications List */
+.notifications-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notification-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background: #e3f2fd; /* Light blue background */
+    border: 1px solid #90caf9; /* Blue border */
+    border-radius: 5px;
+    color: #0d47a1; /* Dark blue text */
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown for Issue Type */
+.issue-dropdown {
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    background: #f9f9f9;
+    cursor: pointer;
+}
+
+.issue-dropdown:focus {
+    outline: none;
+    border-color: #90caf9;
 }

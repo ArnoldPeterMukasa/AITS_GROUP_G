@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './AcademicRegistrarDashboard.css'; // Include CSS file for styling
-import ManageUsersPage from './ManageUsersPage';
 
 function AcademicRegistrarDashboard() {
     const [issues, setIssues] = useState([]);
@@ -21,9 +20,9 @@ function AcademicRegistrarDashboard() {
     // Sample data (could come from an API)
     useEffect(() => {
         setIssues([
-            { id: 1, title: "Issue with course materials", status: "open", category: "student", department: "Math", course: "Calculus 101" },
+            { id: 1, title: "Issue with course materials on muele", status: "open", category: "student", department: "Math", course: "Calculus 101" },
             { id: 2, title: "Lecturer request for more hours", status: "resolved", category: "lecturer", department: "Computer Science", course: "Data Structures" },
-            { id: 3, title: "Urgent technical issue", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
+            { id: 3, title: "errors in course enrollment data", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
         ]);
 
         setAnalytics({
@@ -56,7 +55,7 @@ function AcademicRegistrarDashboard() {
     const reassignIssue = (id) => {
         alert(`Issue ${id} reassigned.`);
     };
-
+        
     const handleLogout = () => {
         localStorage.removeItem("authToken"); // Clear token
         navigate("/login"); // Navigate to the login page
@@ -69,7 +68,6 @@ function AcademicRegistrarDashboard() {
                 <ul>
                     <li><Link to="/AcademicRegistrarDashboard">Home</Link></li>
                     <li><Link to="/manageUsersPage">Manage Users</Link></li>
-                    <li><Link to="/ReportsPage">Reports</Link></li>
                     <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
                     <li><Link to="/Settings">Settings</Link></li>
                     <li><button onClick={handleLogout}>Logout</button></li>
@@ -115,6 +113,8 @@ function AcademicRegistrarDashboard() {
                             <option value="all">All Statuses</option>
                             <option value="open">Open</option>
                             <option value="resolved">Resolved</option>
+                            <option value="pending">Pending</option>
+                            
                         </select>
                     </form>
                 </div>

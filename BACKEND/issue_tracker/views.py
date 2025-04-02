@@ -16,8 +16,15 @@ User = get_user_model()
 
 #user registration
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
+    queryset = User.objects.all() #optional but a good practice
+    serializer_class = RegisterSerializer #defines a serializer for the user registration
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegistrarDashboardView(APIView):
     def get(self, request):
@@ -153,8 +160,4 @@ class NotificationListView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user)
 
-#  Get Audit Logs (Only Admin can view)
-class AuditTrailListView(generics.ListAPIView):
-    queryset = AuditTrail.objects.all()
-    serializer_class = AuditTrailSerializer
-    permission_classes = [permissions.IsAuthenticated, IsRegistrar]  # Only Registrar can access
+
