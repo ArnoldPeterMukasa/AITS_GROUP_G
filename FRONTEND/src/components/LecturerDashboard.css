@@ -37,3 +37,6 @@
   background: none;
 
 }
+.sidebar ul li button {
+  cursor: pointer;
+}
