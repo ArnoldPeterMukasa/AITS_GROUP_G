@@ -10,7 +10,7 @@ from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Avg, Q
 from datetime import timedelta, datetime
 from django.core.mail import send_mail
-
+from django.contrib.auth import authenticate
 
 User = get_user_model()
 
@@ -89,8 +89,22 @@ class RegistrarDashboardView(APIView):
 #user login
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
-    
+
     def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "token": str(refresh.access_token),
+                "role": user.user_type,  # Assuming user_type is a field in your User model
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    '''def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
@@ -100,7 +114,7 @@ class LoginView(APIView):
                 'access': str(refresh.access_token),
                 'user': UserSerializer(user).data             
             })
-        return Response(serializer.errors, status=400)  
+        return Response(serializer.errors, status=400)'''
     
     
 #Logout user
