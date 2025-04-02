@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Issue, Notification
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
@@ -83,8 +84,54 @@ class RegistrarDashboardView(APIView):
                 'statuses': statuses,
             }
         })
+        
+class StudentDashboardView(APIView):
+    authentication_classes = [JWTAuthentication]  # Secure access with JWT
+    permission_classes = [IsStudent]  # Restrict access to students only
 
- 
+    def get(self, request):
+        # Fetch the logged-in user (assumed to be a student)
+        student = request.user
+
+        # Query issues reported by the student
+        issues = Issue.objects.filter(reported_by=student)
+
+        # Apply optional filters from query parameters
+        status = request.query_params.get('status')
+        category = request.query_params.get('category')
+
+        if status and status.lower() != 'all':
+            issues = issues.filter(status=status)
+        if category:
+            issues = issues.filter(category=category)
+
+        # Analytics for the student
+        total_issues = issues.count()
+        resolved_issues = issues.filter(status='resolved').count()
+        unresolved_issues = total_issues - resolved_issues
+
+        # Fetch unread notifications for the student
+        notifications = Notification.objects.filter(user=student, is_read=False)
+        serialized_notifications = NotificationSerializer(notifications, many=True).data
+
+        # Serialize issues
+        serialized_issues = IssueSerializer(issues, many=True).data
+
+        # Build and return the response
+        return Response({
+            'analytics': {
+                'totalIssues': total_issues,
+                'resolvedIssues': resolved_issues,
+                'unresolvedIssues': unresolved_issues,
+            },
+            'issues': serialized_issues,
+            'notifications': serialized_notifications,
+            'filters': {
+                'statuses': ['open', 'in_progress', 'resolved', 'all'],
+                'categories': ['missing_marks', 'appeal', 'correction'],
+            }
+        })
+
     
 #user login
 class LoginView(APIView):
@@ -101,6 +148,7 @@ class LoginView(APIView):
                 'user': UserSerializer(user).data             
             })
         return Response(serializer.errors, status=400)  
+    
     
     
 #Logout user
