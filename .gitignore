@@ -10,14 +10,14 @@
 venv/
 myworld/
 __pycache__/
-.env
+
 
 # Testing
 .coverage
 htmlcov/
-.env
-.env.local
-.env.*.local
+#.env
+#.env.local
+#.env.*.local
 
 # Logs
 logs/
