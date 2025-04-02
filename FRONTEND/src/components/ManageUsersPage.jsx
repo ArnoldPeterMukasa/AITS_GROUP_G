@@ -21,8 +21,7 @@ function ManageUsersPage() {
     useEffect(() => {
         // Fetch users from an API or use sample data
         setUsers([
-            { id: 1, name: 'John Doe', role: 'Student', email: 'john.doe@example.com', status: 'Active', dateJoined: '2021-02-01', department: 'Computer Science' },
-            { id: 2, name: 'Jane Smith', role: 'Lecturer', email: 'jane.smith@example.com', status: 'Inactive', dateJoined: '2020-05-15', department: 'Mathematics' },
+
         ]);
     }, []);
 
@@ -208,7 +207,7 @@ function ManageUsersPage() {
                     <option value="">All Departments</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
+                    <option value="information technology">Information technology</option>
                 </select>
                 <select name="status" onChange={handleFilterChange} value={filters.status}>
                     <option value="">All Statuses</option>
