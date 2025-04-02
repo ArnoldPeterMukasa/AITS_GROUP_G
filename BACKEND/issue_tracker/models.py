@@ -13,6 +13,12 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
     department = models.CharField(max_length=100, blank=True, null=True)
 
+    # Role-specific fields
+    registration_number = models.CharField(max_length=50, blank=True, null=True)  # For students
+    course = models.CharField(max_length=100, blank=True, null=True)  # For students
+    lecturer_id = models.CharField(max_length=50, blank=True, null=True)  # For lecturers
+    academic_title = models.CharField(max_length=100, blank=True, null=True)  # For registrars
+
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
 

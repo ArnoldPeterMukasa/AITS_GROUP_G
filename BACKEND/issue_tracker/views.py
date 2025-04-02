@@ -1,5 +1,5 @@
 # Description: This file contains the views for the issue_tracker app.
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -17,8 +17,15 @@ User = get_user_model()
 
 #user registration
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = RegisterSerializer
+    queryset = User.objects.all() #optional but a good practice
+    serializer_class = RegisterSerializer #defines a serializer for the user registration
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegistrarDashboardView(APIView):
     def get(self, request):

@@ -1,69 +1,286 @@
-/* Basic Layout */
+/* ManageIssues.css */
+
+/* Base Styles */
 .manage-issues-container {
-    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    color: #2d3748;
 }
 
+.manage-issues-container h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1a365d;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.manage-issues-container h1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, #4299e1, #3182ce);
+    border-radius: 2px;
+}
+
+.manage-issues-container h3 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #2b6cb0;
+    margin: 2rem 0 1rem;
+}
+
+/* Controls Section */
 .controls {
-    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
 }
 
 .controls input,
 .controls select {
-    margin-right: 10px;
-    padding: 8px;
-    font-size: 16px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #f8fafc;
 }
 
+.controls input:focus,
+.controls select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.controls input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M19 19l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.25rem;
+    padding-right: 3rem;
+}
+
+/* Tables */
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-table th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
 }
 
 th {
-    background-color: #f4f4f4;
+    background-color: #4299e1;
+    color: white;
+    font-weight: 500;
+    text-align: left;
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
 }
 
+td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+tr:hover {
+    background-color: #ebf8ff;
+}
+
+/* Status Badges */
+td:nth-child(4) {
+    font-weight: 500;
+}
+
+td:nth-child(4):contains("Pending") {
+    color: #dd6b20;
+    background-color: #fffaf0;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+td:nth-child(4):contains("Resolved") {
+    color: #38a169;
+    background-color: #f0fff4;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+td:nth-child(4):contains("Assigned to Registrar") {
+    color: #3182ce;
+    background-color: #ebf8ff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    display: inline-block;
+}
+
+/* Action Buttons */
 button {
-    padding: 8px 12px;
-    background-color: #4CAF50;
+    padding: 0.5rem 1rem;
+    background-color: #4299e1;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
+    font-weight: 500;
     cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #3182ce;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+button::before {
+    content: '→';
+    font-weight: bold;
+}
+
+/* Layout Sections */
+.unassigned-complaints,
+.assigned-complaints {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+    margin-bottom: 2rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .controls input,
-    .controls select {
-        width: 100%;
-        margin-bottom: 10px;
+    .controls {
+        grid-template-columns: 1fr;
     }
 
-    table th, td {
-        font-size: 14px;
-        padding: 8px;
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .manage-issues-container {
+        padding: 1rem;
+    }
+
+    .manage-issues-container h1 {
+        font-size: 2rem;
     }
 }
 
-@media (max-width: 480px) {
-    table th, td {
-        font-size: 12px;
-        padding: 6px;
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
 
-    button {
-        padding: 6px 10px;
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.unassigned-complaints,
+.assigned-complaints {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+.assigned-complaints {
+    animation-delay: 0.1s;
+}
+
+/* Status Indicator Pills */
+.status-pill {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.status-pill.pending {
+    background-color: #fffaf0;
+    color: #dd6b20;
+}
+
+.status-pill.resolved {
+    background-color: #f0fff4;
+    color: #38a169;
+}
+
+.status-pill.assigned {
+    background-color: #ebf8ff;
+    color: #3182ce;
+}
+
+/* Hover Effects */
+tr {
+    transition: all 0.2s ease;
+}
+
+/* Focus States */
+button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+/* Loading State (if you add loading functionality later) */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.loading-spinner {
+    border: 4px solid rgba(66, 153, 225, 0.2);
+    border-radius: 50%;
+    border-top: 4px solid #4299e1;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }

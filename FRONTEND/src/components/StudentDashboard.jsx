@@ -1,18 +1,25 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import CreateIssueForm from "./CreateIssueForm";
 import "./StudentDashboard.css";
 
 function StudentDashboard() {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Retrieve the student name from the registration page (passed via state)
+    const { name } = location.state || { name: "Student" };
+
     const [user, setUser] = useState({
-        name: "",
+        name: name, // Use the name passed from the registration page
         email: "",
         registrationNumber: "",
         program: "Computer Science",
         workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"], // Example worked upon issues
     });
 
-    const [newIssue, setNewIssue] = useState(""); // State to hold the new issue
+    const [newIssue, setNewIssue] = useState(""); // State to hold the new issue description
+    const [issueType, setIssueType] = useState("Missing Marks"); // State to hold the selected issue type
     const [createdIssues, setCreatedIssues] = useState([]); // State to hold created issues
     const [submittedIssues, setSubmittedIssues] = useState([]); // State to hold submitted issues
     const [showNotifications, setShowNotifications] = useState(false); // State to toggle notifications
@@ -26,8 +33,10 @@ function StudentDashboard() {
 
     const handleCreateIssue = () => {
         if (newIssue.trim() !== "") {
-            setCreatedIssues([...createdIssues, newIssue]); // Add the new issue to the list
+            // Add the new issue with its type to the list
+            setCreatedIssues([...createdIssues, { description: newIssue, type: issueType }]);
             setNewIssue(""); // Clear the input field
+            setIssueType("Missing Marks"); // Reset the dropdown to the default value
         }
     };
 
@@ -46,27 +55,31 @@ function StudentDashboard() {
     };
 
     return (
+        
+    
+
+        
         <div className="dashboard-container">
             {/* Header Section */}
             <nav className="dashboard-header">
                 <h1>Student Dashboard</h1>
                 <div className="header-actions">
-                    <button className="header-button" onClick={scrollToWelcome}>
+                    <button className="button" onClick={scrollToWelcome}>
                         Home
                     </button>
                     <button
-                        className="navbar-button"
+                        className="button"
                         onClick={() => navigate("/inbox", { state: { user } })}
                     >
                         Inbox
                     </button>
                     <button
-                        className="header-button"
+                        className="button"
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
                         Notifications
                     </button>
-                    <button className="header-button logout-button" onClick={handleLogout}>
+                    <button className="button logout-button" onClick={handleLogout}>
                         Logout
                     </button>
                 </div>
@@ -99,6 +112,18 @@ function StudentDashboard() {
                         <div className="section">
                             <h2>Create Issue</h2>
                             <div className="create-issue-form">
+                                {/* Dropdown for Issue Type */}
+                                <select
+                                    value={issueType}
+                                    onChange={(e) => setIssueType(e.target.value)}
+                                    className="issue-dropdown"
+                                >
+                                    <option value="Missing Marks">Missing Marks</option>
+                                    <option value="Appeal">Appeal</option>
+                                    <option value="Correction for Marks">Correction for Marks</option>
+                                </select>
+
+                                {/* Input for Issue Description */}
                                 <input
                                     type="text"
                                     placeholder="Enter issue description"
@@ -106,16 +131,23 @@ function StudentDashboard() {
                                     onChange={(e) => setNewIssue(e.target.value)}
                                     className="issue-input"
                                 />
+
+                                {/* Add Issue Button */}
                                 <button className="create-issue-button" onClick={handleCreateIssue}>
                                     Add Issue
                                 </button>
                             </div>
+
+                            {/* Display Created Issues */}
                             <div className="created-issues">
                                 <h3>Created Issues</h3>
                                 <ul>
                                     {createdIssues.length > 0 ? (
                                         createdIssues.map((issue, index) => (
-                                            <li key={index}>{issue}</li>
+                                            <li key={index}>
+                                                <strong>Type:</strong> {issue.type} <br />
+                                                <strong>Description:</strong> {issue.description}
+                                            </li>
                                         ))
                                     ) : (
                                         <p>No issues created yet.</p>

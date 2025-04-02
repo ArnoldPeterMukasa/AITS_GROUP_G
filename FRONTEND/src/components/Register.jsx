@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios"; // Import axios for API requests
 import "./Register.css";
 
 function RegisterPage() {
@@ -27,48 +28,49 @@ function RegisterPage() {
             [id]: value,
         }));
     };
-
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-
-
+    
         // Validate form data
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
-
-        if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
     
-        
-
-        // Store role in localStorage (or send this info to your backend)
-        localStorage.setItem("role", formData.role);
-
-        // Redirect based on role
-        if (formData.role === "student") {
-            navigate("/studentdashboard", {
-                state: {
-                    user: {
-                        name: `${formData.firstName} ${formData.lastName}`,
-                        email: formData.email,
-                        registrationNumber: formData.registrationNumber,
-                        program: formData.course,
-                        pendingIssues: [], // Default pending issues
-                    },
+        try {
+            const response = await fetch("http://127.0.0.1:8000/api/register/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
                 },
+                body: JSON.stringify({
+                    username: formData.username,
+                    email: formData.email,
+                    password: formData.password,
+                    user_type: formData.role,
+                    department: formData.college, // Assuming "college" maps to "department"
+                    first_name: formData.firstName,
+                    last_name: formData.lastName,
+                    registration_number: formData.registrationNumber,
+                    course: formData.course,
+                }),
             });
-        } else if (formData.role === "lecturer") {
-            navigate("/lecturerdashboard");
-        } else if (formData.role === "registrar") {
-            navigate("/academicregistrardashboard");
-        } else {
-            alert("Please select a valid role.");
+    
+            if (response.ok) {
+                const data = await response.json();
+                alert("Registration successful!");
+            } else {
+                const errorData = await response.json();
+                console.error("Error:", errorData);
+                alert(`Registration failed: ${JSON.stringify(errorData)}`);
+            }
+        } catch (error) {
+            console.error("Error during registration:", error);
+            alert("An error occurred. Please try again.");
         }
     };
+
+    
 
     return (
         <div className="register-container">

@@ -45,13 +45,37 @@ class AuditTrailSerializer(serializers.ModelSerializer):
 # User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    registration_number = serializers.CharField(required=False, allow_blank=True)
+    course = serializers.CharField(required=False, allow_blank=True)
+    lecturer_id = serializers.CharField(required=False, allow_blank=True)
+    academic_title = serializers.CharField(required=False, allow_blank=True)
+
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
+        #fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
+        fields = [
+            'username', 'email', 'password', 'user_type', 'department',
+            'first_name', 'last_name',  # Include first_name and last_name
+            'registration_number', 'course', 'lecturer_id', 'academic_title'
+        ]
+
+        def create(self, validated_data):
+            user = User.objects.create_user(
+                username=validated_data['username'],
+                email=validated_data['email'],
+                password=validated_data['password'],
+                user_type=validated_data['user_type'],
+                department=validated_data.get('department', None),
+                registration_number=validated_data.get('registration_number', None),
+                course=validated_data.get('course', None),
+                lecturer_id=validated_data.get('lecturer_id', None),
+                academic_title=validated_data.get('academic_title', None),
+            )
+            return user
 
 
-    def validate_user_type(self, value):
+    '''def validate_user_type(self, value):
         valid_types = ['student', 'lecturer','registrar']
         if value not in valid_types:
             raise serializers.ValidationError("Invalid user_type. Must be student, lecturer,  or registrar.")
@@ -59,7 +83,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
-        return user 
+        return user'''
 
 # User Login Serializer
 class LoginSerializer(serializers.Serializer):
