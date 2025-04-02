@@ -40,3 +40,8 @@
 .sidebar ul li button {
   cursor: pointer;
 }
+.content {
+  flex: 1;
+  padding: 20px;
+ 
+}
