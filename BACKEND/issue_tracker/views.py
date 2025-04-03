@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Issue, Notification
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
+from .serializers import UserSerializer, RegisterSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Avg, Q
 from datetime import timedelta, datetime
