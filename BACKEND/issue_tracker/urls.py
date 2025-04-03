@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, StudentDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationListView,RegistrarDashboardView
+from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationListView,RegistrarDashboardView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -13,5 +13,6 @@ urlpatterns = [
     path('notifications/', NotificationListView.as_view(), name='notification-list'),
     path('RegistrarDashboard/', RegistrarDashboardView.as_view(), name='registrar-dashboard'),
     path('dashboard/student/', StudentDashboardView.as_view(), name='student_dashboard'),
+        path('dashboard/lecturer/', LecturerDashboardView.as_view(), name='lecturer_dashboard'),
 
 ]
