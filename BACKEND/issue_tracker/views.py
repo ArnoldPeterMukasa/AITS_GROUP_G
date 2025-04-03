@@ -1,5 +1,5 @@
 # Description: This file contains the views for the issue_tracker app.
-from rest_framework import generics, permissions,status
+from rest_framework import generics, permissions,status,serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -138,45 +138,56 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-        user = authenticate(username=username, password=password)
-
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                "token": str(refresh.access_token),
-                "role": user.user_type,  # Assuming user_type is a field in your User model
-            }, status=status.HTTP_200_OK)
-        else:
-            return Response({"message": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
-    
-    '''def post(self, request):
+        print(f"DEBUG: Received login request with data: {request.data}")
+        
         serializer = LoginSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.validated_data['user']
-            refresh = RefreshToken.for_user(user)
+        try:
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
+            print(f"DEBUG: Login successful")
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': UserSerializer(user).data             
-            })
-        return Response(serializer.errors, status=400)'''
-    
-    
+                'token': validated_data['token'],
+                'refresh': validated_data['refresh'],
+                'role': validated_data['user']['role'],
+                'user': validated_data['user']
+            }, status=status.HTTP_200_OK)
+        except serializers.ValidationError as e:
+            print(f"DEBUG: Validation error: {str(e)}")
+            return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            print(f"DEBUG: Unexpected error: {str(e)}")
+            return Response(
+                {"error": "An unexpected error occurred"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
 #Logout user
-class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+'''class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        print(f"DEBUG: Received login request with data: {request.data}")
+        
+        serializer = LoginSerializer(data=request.data)
         try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response({"message": "Logged out successfully"}, status=200)
-        except Exception as _:
-            return Response({"error": "Invalid token"}, status=400)   
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                print(f"DEBUG: Login successful for user: {validated_data['user']['username']}")
+                return Response({
+                    'token': validated_data['token'],
+                    'refresh': validated_data['refresh'],
+                    'role': validated_data['user']['role'],
+                    'user': validated_data['user']
+                }, status=status.HTTP_200_OK)
+            else:
+                print(f"DEBUG: Validation failed: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            print(f"DEBUG: Login exception: {str(e)}")
+            return Response(
+                {"error": "An error occurred during login"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )'''
     
 
 # Get List of Users (for frontend to display user info)
