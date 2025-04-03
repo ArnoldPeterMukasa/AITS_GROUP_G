@@ -12,6 +12,7 @@ from django.db.models import Avg, Q
 from datetime import timedelta, datetime
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
+from django.conf import settings
 
 User = get_user_model()
 
@@ -26,6 +27,31 @@ class RegisterView(generics.CreateAPIView):
             user = serializer.save()
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReportIssueView(APIView):
+    def post(self, request):
+        serializer = IssueSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            issue = serializer.save(reported_by=request.user)  # Save issue with the logged-in user
+            
+            # Send email notification
+            subject = f"Issue Reported: {issue.title}"
+            message = f"Dear {request.user.first_name},\n\nYour issue titled '{issue.title}' has been successfully reported.\n\nCategory: {issue.category}\nDescription: {issue.description}\n\nBest regards,\nYour Team"
+            recipient_list = [request.user.email]
+            
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,  # From email
+                recipient_list,
+                fail_silently=False,
+            )
+
+            return Response({"message": "Issue reported successfully, and email notification sent."}, status=201)
+        
+        return Response(serializer.errors, status=400)
+
 
 class RegistrarDashboardView(APIView):
     def get(self, request):
