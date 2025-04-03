@@ -6,12 +6,13 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Issue, Notification
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
+from .serializers import UserSerializer, RegisterSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Avg, Q
 from datetime import timedelta, datetime
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
+from django.conf import settings
 
 User = get_user_model()
 
@@ -26,6 +27,31 @@ class RegisterView(generics.CreateAPIView):
             user = serializer.save()
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ReportIssueView(APIView):
+    def post(self, request):
+        serializer = IssueSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            issue = serializer.save(reported_by=request.user)  # Save issue with the logged-in user
+            
+            # Send email notification
+            subject = f"Issue Reported: {issue.title}"
+            message = f"Dear {request.user.first_name},\n\nYour issue titled '{issue.title}' has been successfully reported.\n\nCategory: {issue.category}\nDescription: {issue.description}\n\nBest regards,\nYour Team"
+            recipient_list = [request.user.email]
+            
+            send_mail(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,  # From email
+                recipient_list,
+                fail_silently=False,
+            )
+
+            return Response({"message": "Issue reported successfully, and email notification sent."}, status=201)
+        
+        return Response(serializer.errors, status=400)
+
 
 class RegistrarDashboardView(APIView):
     def get(self, request):
@@ -138,26 +164,35 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        print(f"DEBUG: Received login request with data: {request.data}")
-        
-        serializer = LoginSerializer(data=request.data)
+        # Extract username and password from the request data
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({"error": "Username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return Response({"error": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+
         try:
-            serializer.is_valid(raise_exception=True)
-            validated_data = serializer.validated_data
-            print(f"DEBUG: Login successful")
+            # Generate tokens for the authenticated user
+            refresh = RefreshToken.for_user(user)
             return Response({
-                'token': validated_data['token'],
-                'refresh': validated_data['refresh'],
-                'role': validated_data['user']['role'],
-                'user': validated_data['user']
+                'token': str(refresh.access_token),
+                'refresh': str(refresh),
+                'role': user.role,  # Assuming `role` is a field on the User model
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                }
             }, status=status.HTTP_200_OK)
-        except serializers.ValidationError as e:
-            print(f"DEBUG: Validation error: {str(e)}")
-            return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            print(f"DEBUG: Unexpected error: {str(e)}")
+            # Log the error (optional) and return a JSON response
             return Response(
-                {"error": "An unexpected error occurred"},
+                {"error": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -200,10 +235,25 @@ class UserListView(generics.ListAPIView):
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
+    permission_classes = [permissions.IsAuthenticated, IsStudent]  # Only Students can access
 
     def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by
+        # Extract data from the request
+        title = self.request.data.get('title')
+        description = self.request.data.get('description')
+        category = self.request.data.get('category')
+        priority = self.request.data.get('priority')  # Example: additional field
+        due_date = self.request.data.get('due_date')  # Example: additional field
+
+        # Save the issue with the current user as the reporter
+        serializer.save(
+            reported_by=self.request.user,
+            title=title,
+            description=description,
+            category=category,
+            priority=priority,  # Save additional field
+            due_date=due_date   # Save additional field
+        )
 
 #  Retrieve, Update, and Delete an Issue
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -214,6 +264,7 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         issue = self.get_object()
         oldstatus = issue.status
+        
         updated_issue = serializer.save()
         new_status = updated_issue.status
         
