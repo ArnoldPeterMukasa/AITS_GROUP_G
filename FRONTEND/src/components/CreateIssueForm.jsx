@@ -5,17 +5,27 @@ function CreateIssueForm() {
     const [description, setDescription] = useState("");
     const [type, setType] = useState("Missing Marks");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false); // Add loading state
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true); // Set loading to true
         try {
             const issueData = { description, type };
             const response = await createIssue(issueData); // Call the API function
-            setMessage("Issue created successfully!");
-            console.log("Issue created:", response);
+            if (response.status === 201) { // Assuming 201 is the success status code
+                setMessage("Issue created successfully!");
+                console.log("Issue created:", response.data);
+                setDescription(""); // Clear the description field
+                setType("Missing Marks"); // Reset the type field
+            } else {
+                setMessage("Failed to create issue. Please try again.");
+            }
         } catch (error) {
             console.error("Error creating issue:", error);
             setMessage("Failed to create issue.");
+        } finally {
+            setLoading(false); // Set loading to false
         }
     };
 
@@ -34,7 +44,9 @@ function CreateIssueForm() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                 />
-                <button type="submit">Create Issue</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? "Submitting..." : "Create Issue"}
+                </button>
             </form>
             {message && <p>{message}</p>}
         </div>

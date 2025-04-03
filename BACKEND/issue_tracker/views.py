@@ -164,26 +164,35 @@ class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        print(f"DEBUG: Received login request with data: {request.data}")
-        
-        serializer = LoginSerializer(data=request.data)
+        # Extract username and password from the request data
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({"error": "Username and password are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+        if user is None:
+            return Response({"error": "Invalid credentials."}, status=status.HTTP_401_UNAUTHORIZED)
+
         try:
-            serializer.is_valid(raise_exception=True)
-            validated_data = serializer.validated_data
-            print(f"DEBUG: Login successful")
+            # Generate tokens for the authenticated user
+            refresh = RefreshToken.for_user(user)
             return Response({
-                'token': validated_data['token'],
-                'refresh': validated_data['refresh'],
-                'role': validated_data['user']['role'],
-                'user': validated_data['user']
+                'token': str(refresh.access_token),
+                'refresh': str(refresh),
+                'role': user.role,  # Assuming `role` is a field on the User model
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                }
             }, status=status.HTTP_200_OK)
-        except serializers.ValidationError as e:
-            print(f"DEBUG: Validation error: {str(e)}")
-            return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            print(f"DEBUG: Unexpected error: {str(e)}")
+            # Log the error (optional) and return a JSON response
             return Response(
-                {"error": "An unexpected error occurred"},
+                {"error": "An unexpected error occurred. Please try again later."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -211,10 +220,25 @@ class UserListView(generics.ListAPIView):
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
+    permission_classes = [permissions.IsAuthenticated, IsStudent]  # Only Students can access
 
     def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by
+        # Extract data from the request
+        title = self.request.data.get('title')
+        description = self.request.data.get('description')
+        category = self.request.data.get('category')
+        priority = self.request.data.get('priority')  # Example: additional field
+        due_date = self.request.data.get('due_date')  # Example: additional field
+
+        # Save the issue with the current user as the reporter
+        serializer.save(
+            reported_by=self.request.user,
+            title=title,
+            description=description,
+            category=category,
+            priority=priority,  # Save additional field
+            due_date=due_date   # Save additional field
+        )
 
 #  Retrieve, Update, and Delete an Issue
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -225,6 +249,7 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_update(self, serializer):
         issue = self.get_object()
         oldstatus = issue.status
+        
         updated_issue = serializer.save()
         new_status = updated_issue.status
         
