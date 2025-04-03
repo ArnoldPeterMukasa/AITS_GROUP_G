@@ -1,6 +1,6 @@
 import { useEffect,useState } from "react";
 import { Outlet } from "react-router-dom";
-import {getUsers} from "./api"; // Assuming you have an API function to fetch users
+import {getUsers} from "../src/components/Api"; // Assuming you have an API function to fetch users
 
 function App() {
   const [users, setUsers] = useState([]);
