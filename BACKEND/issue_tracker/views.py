@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Issue, Notification
-from .serializers import UserSerializer, RegisterSerializer, IssueSerializer, NotificationSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Avg, Q
 from datetime import timedelta, datetime
@@ -161,18 +161,33 @@ class LoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
-# Logout user
-class LogoutView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+#Logout user
+'''class LoginView(APIView):
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
+        print(f"DEBUG: Received login request with data: {request.data}")
+        
+        serializer = LoginSerializer(data=request.data)
         try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response({"message": "Logged out successfully"}, status=200)
-        except Exception as _:
-            return Response({"error": "Invalid token"}, status=400)
+            if serializer.is_valid():
+                validated_data = serializer.validated_data
+                print(f"DEBUG: Login successful for user: {validated_data['user']['username']}")
+                return Response({
+                    'token': validated_data['token'],
+                    'refresh': validated_data['refresh'],
+                    'role': validated_data['user']['role'],
+                    'user': validated_data['user']
+                }, status=status.HTTP_200_OK)
+            else:
+                print(f"DEBUG: Validation failed: {serializer.errors}")
+                return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            print(f"DEBUG: Login exception: {str(e)}")
+            return Response(
+                {"error": "An error occurred during login"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )'''
     
 
 # Get List of Users (for frontend to display user info)
