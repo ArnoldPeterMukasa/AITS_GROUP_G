@@ -157,6 +157,50 @@ class StudentDashboardView(APIView):
                 'categories': ['missing_marks', 'appeal', 'correction'],
             }
         })
+        
+class LecturerDashboardView(APIView):
+    authentication_classes = [JWTAuthentication]  # Secure API with JWT
+    permission_classes = [IsLecturer]  # Restrict access to lecturers only
+
+    def get(self, request):
+        # Fetch the logged-in lecturer
+        lecturer = request.user
+
+        # Query issues assigned to the lecturer
+        issues = Issue.objects.filter(assigned_to=lecturer)
+
+        # Apply filters from query parameters
+        status = request.query_params.get('status')
+        category = request.query_params.get('category')
+
+        if status and status.lower() != 'all':
+            issues = issues.filter(status=status)
+        if category:
+            issues = issues.filter(category=category)
+
+        # Analytics for the lecturer
+        total_issues = issues.count()
+        resolved_issues = issues.filter(status='resolved').count()
+        unresolved_issues = total_issues - resolved_issues
+
+        # Fetch unread notifications for the lecturer
+        notifications = Notification.objects.filter(user=lecturer, is_read=False)
+
+        # Build and return the response
+        return Response({
+            'analytics': {
+                'totalIssues': total_issues,
+                'resolvedIssues': resolved_issues,
+                'unresolvedIssues': unresolved_issues,
+            },
+            'issues': IssueSerializer(issues, many=True).data,
+            'notifications': NotificationSerializer(notifications, many=True).data,
+            'filters': {
+                'statuses': ['open', 'in_progress', 'resolved', 'all'],
+                'categories': list(Issue.objects.values_list('category', flat=True).distinct()),
+            }
+        })
+
 
     
 #user login
