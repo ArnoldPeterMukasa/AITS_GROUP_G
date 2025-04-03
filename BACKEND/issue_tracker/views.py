@@ -13,8 +13,56 @@ from datetime import timedelta, datetime
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
 
 User = get_user_model()
+
+class RequestPasswordResetView(APIView):
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({"error": "Email is required"}, status=400)
+
+        try:
+            user = User.objects.get(email=email)
+            # Generate reset token
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+            # Send reset link via email
+            reset_link = f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
+            subject = "Password Reset Request"
+            message = f"Hello {user.first_name},\n\nClick the link below to reset your password:\n\n{reset_link}\n\nIf you didn't request this, you can ignore this email."
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email])
+
+            return Response({"message": "Password reset email sent successfully"}, status=200)
+        except User.DoesNotExist:
+            return Response({"error": "No user found with this email"}, status=404)
+
+class ResetPasswordConfirmView(APIView):
+    def post(self, request, uidb64, token):
+        try:
+            # Decode the user ID
+            user_id = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=user_id)
+
+            # Verify the token
+            if not default_token_generator.check_token(user, token):
+                return Response({"error": "Invalid or expired token"}, status=400)
+
+            # Set new password
+            new_password = request.data.get("new_password")
+            if not new_password:
+                return Response({"error": "New password is required"}, status=400)
+
+            user.set_password(new_password)
+            user.save()
+            return Response({"message": "Password reset successful"}, status=200)
+        except (User.DoesNotExist, ValueError):
+            return Response({"error": "Invalid user or token"}, status=404)
+
 
 #user registration
 class RegisterView(generics.CreateAPIView):
