@@ -20,9 +20,9 @@ function AcademicRegistrarDashboard() {
     // Sample data (could come from an API)
     useEffect(() => {
         setIssues([
-            { id: 1, title: "Issue with course materials on muele", status: "open", category: "student", department: "Math", course: "Calculus 101" },
-            { id: 2, title: "Lecturer request for more hours", status: "resolved", category: "lecturer", department: "Computer Science", course: "Data Structures" },
-            { id: 3, title: "errors in course enrollment data", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
+            // { id: 1, title: "Issue with course materials on muele", status: "open", category: "student", department: "Math", course: "Calculus 101" },
+            // { id: 2, title: "Lecturer request for more hours", status: "resolved", category: "lecturer", department: "Computer Science", course: "Data Structures" },
+            // { id: 3, title: "errors in course enrollment data", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
         ]);
 
         setAnalytics({

@@ -36,7 +36,11 @@ function VerificationCodePage() {
     }, []);
 
     const handleChange = (index, value) => {
-        if (!/^\d*$/.test(value)) return; // Only allow numbers
+        if (!/^\d*$/.test(value)) {
+            {
+                return; // Only allow numbers
+            }
+        }
         
         const newCode = [...code];
         newCode[index] = value;
