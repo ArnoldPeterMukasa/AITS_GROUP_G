@@ -12,6 +12,21 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import environ
+
+# Initialize environ
+env = environ.Env()
+
+# Read the .env file
+environ.Env.read_env()
+
+# Email configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST')  # Load from .env
+EMAIL_PORT = env('EMAIL_PORT', cast=int)  # Convert to integer
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', cast=bool)  # Convert to boolean
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')  # Load from .env
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')  # Load from .env
 #from decouple import config
 
 # from django.conf.global_settings import AUTH_USER_MODEL
@@ -159,3 +174,5 @@ EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER',default='your-default-email@gmail.com')
 EMAIL_HOST_PASSWORD =   config('EMAIL_HOST_PASSWORD',default='your-default-password')
 '''
+
+
