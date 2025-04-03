@@ -50,55 +50,81 @@ class RegisterSerializer(serializers.ModelSerializer):
     lecturer_id = serializers.CharField(required=False, allow_blank=True)
     academic_title = serializers.CharField(required=False, allow_blank=True)
 
-    
     class Meta:
         model = User
-        #fields = ['id', 'username', 'email', 'password', 'user_type', 'department']
         fields = [
             'username', 'email', 'password', 'user_type', 'department',
-            'first_name', 'last_name',  # Include first_name and last_name
+            'first_name', 'last_name',
             'registration_number', 'course', 'lecturer_id', 'academic_title'
         ]
 
-        def create(self, validated_data):
-            user = User.objects.create_user(
-                username=validated_data['username'],
-                email=validated_data['email'],
-                password=validated_data['password'],
-                user_type=validated_data['user_type'],
-                department=validated_data.get('department', None),
-                registration_number=validated_data.get('registration_number', None),
-                course=validated_data.get('course', None),
-                lecturer_id=validated_data.get('lecturer_id', None),
-                academic_title=validated_data.get('academic_title', None),
-            )
-            return user
-
-
-    '''def validate_user_type(self, value):
-        valid_types = ['student', 'lecturer','registrar']
-        if value not in valid_types:
-            raise serializers.ValidationError("Invalid user_type. Must be student, lecturer,  or registrar.")
-        return value    
-        
     def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user'''
+        user = User(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            user_type=validated_data['user_type'],
+            department=validated_data.get('department', None),
+            registration_number=validated_data.get('registration_number', None),
+            course=validated_data.get('course', None),
+            lecturer_id=validated_data.get('lecturer_id', None),
+            academic_title=validated_data.get('academic_title', None),
+        )
+        user.set_password(validated_data['password'])  # Hash the password
+        user.save()
+        return user
 
 # User Login Serializer
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    
+
     def validate(self, data):
         from django.contrib.auth import authenticate
-        user = authenticate(username=data['username'], password=data['password'])
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()  # Use the custom user model
+
+        # Debug print
+        print(f"DEBUG: Attempting login with username: {data.get('username')}")
+
+        # Authenticate user
+        user = authenticate(username=data.get('username'), password=data.get('password'))
+
         if not user:
-            raise serializers.ValidationError("Invalid Credentials")
+            # Check if the user exists in the database
+            user_exists = User.objects.filter(username=data.get('username')).exists()
+            if not user_exists:
+                print(f"DEBUG: User with username '{data.get('username')}' does not exist.")
+            else:
+                # Fetch the user and check the password manually for debugging
+                db_user = User.objects.get(username=data.get('username'))
+                if not db_user.check_password(data.get('password')):
+                    print(f"DEBUG: Password mismatch for username '{data.get('username')}'.")
+                else:
+                    print(f"DEBUG: Authentication failed for an unknown reason for username '{data.get('username')}'.")
+            
+            raise serializers.ValidationError({
+                "non_field_errors": ["Invalid username or password"]
+            })
+
+        # Check if the user is active
+        if not user.is_active:
+            print(f"DEBUG: User with username '{data.get('username')}' is inactive.")
+            raise serializers.ValidationError({
+                "non_field_errors": ["User account is inactive"]
+            })
+
+        # Generate tokens
         refresh = RefreshToken.for_user(user)
+
         return {
+            'token': str(refresh.access_token),
             'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user_data': UserSerializer(user).data,
-            'user': user
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'role': user.user_type,
+                'department': user.department
+            }
         }
