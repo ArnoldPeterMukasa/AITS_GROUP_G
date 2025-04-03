@@ -7,7 +7,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import Issue, Notification
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
-from django.db.models import Avg, Q
+from django.db.models import Q
 from datetime import timedelta, datetime
 from django.core.mail import send_mail
 from django.contrib.auth import authenticate
@@ -15,6 +15,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.timezone import now
 
 User = get_user_model()
 
@@ -76,114 +77,119 @@ class RegisterView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RegistrarDashboardView(APIView):
-    def get(self, request):
-        # Extract query parameters from frontend
-        department = request.query_params.get('department')
+    def get(self, request, *args, **kwargs):
+        issues = Issue.objects.all()
+
+        # Filter issues based on query parameters
         course = request.query_params.get('course')
         status = request.query_params.get('status')
 
-        # Query issues
-        issues = Issue.objects.all()
-
-        # Apply filters dynamically
-        if department:
-            issues = issues.filter(reported_by__department=department)
         if course:
-            issues = issues.filter(category=course)  # Assuming "course" maps to "category"
+            issues = issues.filter(category=course)
         if status and status.lower() != 'all':
             issues = issues.filter(status=status)
 
         # Dashboard analytics
         total_issues = issues.count()
         unresolved_issues = issues.filter(~Q(status='resolved')).count()
-        avg_time = issues.aggregate(avg_time=Avg('updated_at'))['avg_time']
-        avg_resolution_time = avg_time.days if avg_time else 0
+
+        # Calculate average resolution time manually
+        resolved_issues = issues.filter(status='resolved')
+        if resolved_issues.exists():
+            total_time = sum(
+                (issue.updated_at - issue.created_at).total_seconds()
+                for issue in resolved_issues
+            )
+            avg_resolution_time = total_time / resolved_issues.count()
+            avg_resolution_time = timedelta(seconds=avg_resolution_time)
+        else:
+            avg_resolution_time = timedelta(0)
 
         # Overdue issues (open for more than 7 days)
         overdue_issues_count = issues.filter(
-            Q(status='open') & Q(created_at__lte=datetime.now() - timedelta(days=7))
+            Q(status='open') & Q(created_at__lte=now() - timedelta(days=7))
         ).count()
 
-        # Dynamic filters for dropdown options
-        departments = User.objects.values_list('department', flat=True).distinct()
-        categories = Issue.objects.values_list('category', flat=True).distinct()
-        statuses = ['open', 'in_progress', 'resolved', 'all']
-
-        # Serialize issues
-        serialized_issues = IssueSerializer(issues, many=True).data
-
-        # Fetch unread notifications
-        unread_notifications = Notification.objects.filter(is_read=False)
-        serialized_notifications = NotificationSerializer(unread_notifications, many=True).data
-
-        # Build and return the response
-        return Response({
-            'analytics': {
-                'totalIssues': total_issues,
-                'unresolvedIssues': unresolved_issues,
-                'avgResolutionTime': avg_resolution_time,
-                'overdueIssues': overdue_issues_count,
-            },
-            'issues': serialized_issues,
-            'notifications': serialized_notifications,
-            'filters': {
-                'departments': list(departments),
-                'categories': list(categories),
-                'statuses': statuses,
-            }
-        })
+        data = {
+            "total_issues": total_issues,
+            "unresolved_issues": unresolved_issues,
+            "avg_resolution_time": str(avg_resolution_time),
+            "overdue_issues_count": overdue_issues_count,
+        }
+        return Response(data)
         
 class StudentDashboardView(APIView):
-    authentication_classes = [JWTAuthentication]  # Secure access with JWT
-    permission_classes = [IsStudent]  # Restrict access to students only
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsStudent]
 
     def get(self, request):
-        # Fetch the logged-in user (assumed to be a student)
-        student = request.user
+        try:
+            student = request.user
 
-        # Query issues reported by the student
-        issues = Issue.objects.filter(reported_by=student)
-
-        # Apply optional filters from query parameters
-        status = request.query_params.get('status')
-        category = request.query_params.get('category')
-
-        if status and status.lower() != 'all':
-            issues = issues.filter(status=status)
-        if category:
-            issues = issues.filter(category=category)
-
-        # Analytics for the student
-        total_issues = issues.count()
-        resolved_issues = issues.filter(status='resolved').count()
-        unresolved_issues = total_issues - resolved_issues
-
-        # Fetch unread notifications for the student
-        notifications = Notification.objects.filter(user=student, is_read=False)
-        serialized_notifications = NotificationSerializer(notifications, many=True).data
-
-        # Serialize issues
-        serialized_issues = IssueSerializer(issues, many=True).data
-
-        # Build and return the response
-        return Response({
-            'student': {
+            # Add registration number to student info
+            student_info = {
                 'name': f"{student.first_name} {student.last_name}",
                 'email': student.email,
-                'course': student.course,  # Assuming 'course' is a field in the User model
-            },
-            'analytics': {
-                'totalIssues': total_issues,
-                'resolvedIssues': resolved_issues,
-                'unresolvedIssues': unresolved_issues,
-            },
-            'issues': serialized_issues,
-            'notifications': serialized_notifications,
-            'filters': {
-                'statuses': ['open', 'in_progress', 'resolved', 'all'],
-                'categories': ['missing_marks', 'appeal', 'correction'],
+                'registration_number': student.registration_number,  # Add this field
+                'course': student.course,
+                'program': student.program  # Add this if available
             }
-        })
+
+            # Query with error handling
+            try:
+                issues = Issue.objects.filter(reported_by=student)
+                
+                # Filter handling
+                status = request.query_params.get('status')
+                category = request.query_params.get('category')
+                date_range = request.query_params.get('date_range')
+
+                if status and status.lower() != 'all':
+                    issues = issues.filter(status=status)
+                if category:
+                    issues = issues.filter(category=category)
+                if date_range:
+                    # Add date range filtering if needed
+                    pass
+
+                # Enhanced analytics
+                analytics = {
+                    'totalIssues': issues.count(),
+                    'resolvedIssues': issues.filter(status='resolved').count(),
+                    'pendingIssues': issues.filter(status='pending').count(),
+                    'inProgressIssues': issues.filter(status='in_progress').count(),
+                    'recentActivity': issues.filter(
+                        updated_at__gte=datetime.now() - timedelta(days=7)
+                    ).count()
+                }
+
+                return Response({
+                    'status': 'success',
+                    'student': student_info,
+                    'analytics': analytics,
+                    'issues': IssueSerializer(issues, many=True).data,
+                    'notifications': NotificationSerializer(
+                        Notification.objects.filter(user=student, is_read=False),
+                        many=True
+                    ).data,
+                    'filters': {
+                        'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
+                        'categories': ['missing_marks', 'appeal', 'correction', 'other'],
+                        'dateRanges': ['today', 'week', 'month', 'all']
+                    }
+                }, status=status.HTTP_200_OK)
+
+            except Issue.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'No issues found for this student'
+                }, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class LecturerDashboardView(APIView):
     authentication_classes = [JWTAuthentication]  # Secure API with JWT

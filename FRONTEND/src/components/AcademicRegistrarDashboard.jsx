@@ -7,29 +7,46 @@ function AcademicRegistrarDashboard() {
     const [analytics, setAnalytics] = useState({
         avgResolutionTime: 0,
         unresolvedIssues: 0,
-        totalIssues: 0
+        totalIssues: 0,
+        overdueIssuesCount: 0,
     });
     const [filters, setFilters] = useState({
-        department: '',
         course: '',
         status: 'all',
     });
     const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
     const navigate = useNavigate();
 
-    // Sample data (could come from an API)
+    // Fetch data from the backend API
     useEffect(() => {
-        setIssues([
-            // { id: 1, title: "Issue with course materials on muele", status: "open", category: "student", department: "Math", course: "Calculus 101" },
-            // { id: 2, title: "Lecturer request for more hours", status: "resolved", category: "lecturer", department: "Computer Science", course: "Data Structures" },
-            // { id: 3, title: "errors in course enrollment data", status: "open", category: "student", department: "Engineering", course: "Mechanical Engineering" }
-        ]);
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/RegistrarDashboard/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token if required
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-        setAnalytics({
-            avgResolutionTime: 5,
-            unresolvedIssues: 2,
-            totalIssues: 3
-        });
+                if (response.ok) {
+                    const data = await response.json();
+                    setIssues(data.issues || []);
+                    setAnalytics({
+                        avgResolutionTime: data.avg_resolution_time,
+                        unresolvedIssues: data.unresolved_issues,
+                        totalIssues: data.total_issues,
+                        overdueIssuesCount: data.overdue_issues_count,
+                    });
+                } else {
+                    console.error('Failed to fetch data from the backend.');
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
     }, []);
 
     const handleFilterChange = (e) => {
@@ -39,23 +56,10 @@ function AcademicRegistrarDashboard() {
 
     const filteredIssues = issues.filter(issue => {
         const statusMatch = filters.status === 'all' || issue.status === filters.status;
-        const departmentMatch = !filters.department || issue.department === filters.department;
         const courseMatch = !filters.course || issue.course === filters.course;
-        return statusMatch && departmentMatch && courseMatch;
+        return statusMatch && courseMatch;
     });
 
-    const resolveIssue = (id) => {
-        setIssues(prevIssues => prevIssues.map(issue => issue.id === id ? { ...issue, status: 'resolved' } : issue));
-    };
-
-    const escalateIssue = (id) => {
-        alert(`Issue ${id} escalated.`);
-    };
-
-    const reassignIssue = (id) => {
-        alert(`Issue ${id} reassigned.`);
-    };
-        
     const handleLogout = () => {
         localStorage.removeItem("authToken"); // Clear token
         navigate("/login"); // Navigate to the login page
@@ -88,20 +92,17 @@ function AcademicRegistrarDashboard() {
                     </div>
                     <div className="card">
                         <h3>Avg. Resolution Time</h3>
-                        <p>{analytics.avgResolutionTime} days</p>
+                        <p>{analytics.avgResolutionTime}</p>
+                    </div>
+                    <div className="card">
+                        <h3>Overdue Issues</h3>
+                        <p>{analytics.overdueIssuesCount}</p>
                     </div>
                 </div>
 
                 <div className="filters">
                     <h3>Filters</h3>
                     <form>
-                        <select name="department" value={filters.department} onChange={handleFilterChange}>
-                            <option value="">Select Department</option>
-                            <option value="Math">Math</option>
-                            <option value="Engineering">Engineering</option>
-                            <option value="Computer Science">Computer Science</option>
-                        </select>
-
                         <select name="course" value={filters.course} onChange={handleFilterChange}>
                             <option value="">Select Course</option>
                             <option value="Calculus 101">Calculus 101</option>
@@ -114,7 +115,6 @@ function AcademicRegistrarDashboard() {
                             <option value="open">Open</option>
                             <option value="resolved">Resolved</option>
                             <option value="pending">Pending</option>
-                            
                         </select>
                     </form>
                 </div>
@@ -127,7 +127,6 @@ function AcademicRegistrarDashboard() {
                                 <th>Title</th>
                                 <th>Status</th>
                                 <th>Category</th>
-                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -136,11 +135,6 @@ function AcademicRegistrarDashboard() {
                                     <td>{issue.title}</td>
                                     <td>{issue.status}</td>
                                     <td>{issue.category}</td>
-                                    <td>
-                                        <button onClick={() => resolveIssue(issue.id)}>Resolve</button>
-                                        <button onClick={() => escalateIssue(issue.id)}>Escalate</button>
-                                        <button onClick={() => reassignIssue(issue.id)}>Reassign</button>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

@@ -12,6 +12,7 @@ urlpatterns = [
     path('issues/<int:pk>/', IssueDetailView.as_view(), name='issue-detail'),
     path('notifications/', NotificationListView.as_view(), name='notification-list'),
     path('RegistrarDashboard/', RegistrarDashboardView.as_view(), name='registrar-dashboard'),
+    #path('api/RegistrarDashboard/', RegistrarDashboardView.as_view(), name='registrar-dashboard'),
     path('dashboard/student/', StudentDashboardView.as_view(), name='student_dashboard'),
     path('dashboard/lecturer/', LecturerDashboardView.as_view(), name='lecturer_dashboard'),
         

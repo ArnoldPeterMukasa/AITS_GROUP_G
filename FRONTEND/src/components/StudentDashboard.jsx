@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import CreateIssueForm from "./CreateIssueForm";
 import "./StudentDashboard.css";
@@ -8,21 +8,28 @@ function StudentDashboard() {
     const location = useLocation();
 
     // Retrieve the student name from the registration page (passed via state)
-    const { name } = location.state || { name: "Student" };
-
+    const studentData = location.state?.studentData || {
+        name: "Aisha Karungi",
+        email: "aisha@gmail.com",
+        registrationNumber: "24",
+        program: "Computer Science"
+    };
     const [user, setUser] = useState({
-        name: name, // Use the name passed from the registration page
-        email: "",
-        registrationNumber: "",
-        program: "Computer Science",
-        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"], // Example worked upon issues
+        name: studentData.name,
+        email: studentData.email,
+        registrationNumber: studentData.registrationNumber,
+        program: studentData.program,
+        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
     });
+    
 
     const [newIssue, setNewIssue] = useState(""); // State to hold the new issue description
     const [issueType, setIssueType] = useState("Missing Marks"); // State to hold the selected issue type
     const [createdIssues, setCreatedIssues] = useState([]); // State to hold created issues
     const [submittedIssues, setSubmittedIssues] = useState([]); // State to hold submitted issues
-    const [showNotifications, setShowNotifications] = useState(false); // State to toggle notifications
+    const [showNotifications, setShowNotifications] = useState(false);
+     // State to toggle notifications
+     
 
     const scrollToWelcome = () => {
         const welcomeSection = document.getElementById("welcome-section");

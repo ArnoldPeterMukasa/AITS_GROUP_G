@@ -38,13 +38,28 @@ function LoginPage() {
             if (response.ok) {
                 const data = await response.json();
     
+                // Debugging: Log the backend response
+                console.log("Login Response:", data);
+    
                 // Save user data (e.g., token, role) to localStorage or state
                 localStorage.setItem("token", data.token); // Assuming the backend returns a token
                 localStorage.setItem("role", data.role); // Assuming the backend returns the user's role
     
                 // Navigate to the respective dashboard based on the user's role
                 if (data.role === "student") {
-                    navigate("/StudentDashboard");
+                    // Prepare student data to pass to dashboard
+                    const studentData = {
+                        name: data.name,
+                        email: data.email,
+                        registrationNumber: data.registrationNumber,
+                        program: data.program,
+                    };
+                    
+                    navigate("/StudentDashboard", { 
+                        state: { 
+                            studentData: studentData
+                        } 
+                    });
                 } else if (data.role === "lecturer") {
                     navigate("/LecturerDashboard");
                 } else if (data.role === "registrar") {
