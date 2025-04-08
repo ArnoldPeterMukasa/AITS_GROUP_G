@@ -16,6 +16,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.timezone import now
+from restframework import permissions
 
 User = get_user_model()
 
@@ -291,6 +292,8 @@ class LoginView(APIView):
                 {"error": "An error occurred during login"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )'''
+
+            
     
 
 # Get List of Users (for frontend to display user info)
@@ -305,8 +308,35 @@ class IssueListCreateView(generics.ListCreateAPIView):
     serializer_class = IssueSerializer
     permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
 
+    def get_queryset(self): # Only return issues created by the current student
+        return Issue.objects.filter(reported_by=self.request.user)
+
+
     def perform_create(self, serializer):
-        serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by
+        try:
+            # Get the registrar who will be assigned to the issue
+            registrar = User.objects.filter(user_type='registrar').first()
+            
+            # Save the issue with the current student as reported_by
+            issue = serializer.save(
+                reported_by=self.request.user,
+                assigned_to=registrar
+            )
+
+            # Create a notification for the registrar
+            Notification.objects.create(
+                user=registrar,
+                issue=issue,
+                message=f"New issue reported by {self.request.user.get_full_name()} - {issue.title}"
+            )
+
+        except Exception as e:
+            raise serializers.ValidationError(f"Error creating issue: {str(e)}")
+    '''def perform_create(self, serializer):
+        user = self.request.user
+        user.refresh_from_db()  # Ensure the user object is up-to-date
+        serializer.save(reported_by=user)
+        #serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by'''
 
 #  Retrieve, Update, and Delete an Issue
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
