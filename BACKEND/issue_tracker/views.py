@@ -1,5 +1,6 @@
 # Description: This file contains the views for the issue_tracker app.
-from rest_framework import generics, permissions,status,serializers
+from rest_framework import generics, permissions,status,serializers, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -359,7 +360,7 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
             send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
             
 #  Get User Notifications
-class NotificationListView(generics.ListAPIView):
+class NotificationViewSet(generics.ListAPIView):
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
