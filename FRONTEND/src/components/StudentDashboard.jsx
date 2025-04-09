@@ -1,19 +1,26 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import CreateIssueForm from "./CreateIssueForm";
 import "./StudentDashboard.css";
 
 function StudentDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Retrieve the student name from the registration page (passed via state)
+    // Redirect to login if studentData is not passed in state
+    useEffect(() => {
+        if (!location.state?.studentData) {
+            navigate("/login"); // Redirect to login if student info is missing
+        }
+    }, [location.state, navigate]);
+
+    // Default to empty data to avoid undefined errors before redirect
     const studentData = location.state?.studentData || {
-        name: "Aisha Karungi",
-        email: "aisha@gmail.com",
-        registrationNumber: "24",
-        program: "Computer Science"
+        name: "",
+        email: "",
+        registrationNumber: "",
+        program: ""
     };
+
     const [user, setUser] = useState({
         name: studentData.name,
         email: studentData.email,
@@ -21,15 +28,12 @@ function StudentDashboard() {
         program: studentData.program,
         workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
     });
-    
 
-    const [newIssue, setNewIssue] = useState(""); // State to hold the new issue description
-    const [issueType, setIssueType] = useState("Missing Marks"); // State to hold the selected issue type
-    const [createdIssues, setCreatedIssues] = useState([]); // State to hold created issues
-    const [submittedIssues, setSubmittedIssues] = useState([]); // State to hold submitted issues
+    const [newIssue, setNewIssue] = useState("");
+    const [issueType, setIssueType] = useState("Missing Marks");
+    const [createdIssues, setCreatedIssues] = useState([]);
+    const [submittedIssues, setSubmittedIssues] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
-     // State to toggle notifications
-     
 
     const scrollToWelcome = () => {
         const welcomeSection = document.getElementById("welcome-section");
@@ -40,17 +44,16 @@ function StudentDashboard() {
 
     const handleCreateIssue = () => {
         if (newIssue.trim() !== "") {
-            // Add the new issue with its type to the list
             setCreatedIssues([...createdIssues, { description: newIssue, type: issueType }]);
-            setNewIssue(""); // Clear the input field
-            setIssueType("Missing Marks"); // Reset the dropdown to the default value
+            setNewIssue("");
+            setIssueType("Missing Marks");
         }
     };
 
     const handleSubmitIssues = () => {
         if (createdIssues.length > 0) {
-            setSubmittedIssues([...submittedIssues, ...createdIssues]); // Add created issues to submitted issues
-            setCreatedIssues([]); // Clear the created issues list
+            setSubmittedIssues([...submittedIssues, ...createdIssues]);
+            setCreatedIssues([]);
             alert("Issues submitted successfully!");
         } else {
             alert("No issues to submit!");
@@ -58,68 +61,46 @@ function StudentDashboard() {
     };
 
     const handleLogout = () => {
-        navigate("/"); // Redirect to the initial home page
+        navigate("/");
     };
 
     return (
-        
-    
-
-        
         <div className="dashboard-container">
-            {/* Header Section */}
+            {/* Header */}
             <nav className="dashboard-header">
                 <h1>Student Dashboard</h1>
                 <div className="header-actions">
-                    <button className="button" onClick={scrollToWelcome}>
-                        Home
-                    </button>
-                    <button
-                        className="button"
-                        onClick={() => navigate("/inbox", { state: { user } })}
-                    >
-                        Inbox
-                    </button>
-                    <button
-                        className="button"
-                        onClick={() => setShowNotifications(!showNotifications)}
-                    >
-                        Notifications
-                    </button>
-                    <button className="button logout-button" onClick={handleLogout}>
-                        Logout
-                    </button>
+                    <button className="button" onClick={scrollToWelcome}>Home</button>
+                    <button className="button" onClick={() => navigate("/inbox", { state: { user } })}>Inbox</button>
+                    <button className="button" onClick={() => setShowNotifications(!showNotifications)}>Notifications</button>
+                    <button className="button logout-button" onClick={handleLogout}>Logout</button>
                 </div>
             </nav>
 
-            {/* Content Section */}
+            {/* Main Content */}
             <div className="content">
                 {!showNotifications ? (
                     <>
                         <h1 id="welcome-section">Welcome, {user?.name || "Student"}</h1>
+
+                        {/* Profile Info */}
                         <div className="section profile-section">
                             <h2>Your Profile</h2>
-                            <p>
-                                <strong>Name:</strong> {user?.name || "N/A"}
-                            </p>
-                            <p>
-                                <strong>Email:</strong> {user?.email || "N/A"}
-                            </p>
-                            <p>
-                                <strong>Registration Number:</strong> {user?.registrationNumber || "N/A"}
-                            </p>
+                            <p><strong>Name:</strong> {user?.name || "N/A"}</p>
+                            <p><strong>Email:</strong> {user?.email || "N/A"}</p>
+                            <p><strong>Registration Number:</strong> {user?.registrationNumber || "N/A"}</p>
                         </div>
 
+                        {/* Program */}
                         <div className="section">
-                            <h2>Your Program</h2>
-                            <p>{user?.program || "No program available"}</p>
+                            <h2>course</h2>
+                            <p>{user?.course || "No program available"}</p>
                         </div>
 
-                        {/* Create Issue Section */}
+                        {/* Create Issue */}
                         <div className="section">
                             <h2>Create Issue</h2>
                             <div className="create-issue-form">
-                                {/* Dropdown for Issue Type */}
                                 <select
                                     value={issueType}
                                     onChange={(e) => setIssueType(e.target.value)}
@@ -130,7 +111,6 @@ function StudentDashboard() {
                                     <option value="Correction for Marks">Correction for Marks</option>
                                 </select>
 
-                                {/* Input for Issue Description */}
                                 <input
                                     type="text"
                                     placeholder="Enter issue description"
@@ -139,13 +119,12 @@ function StudentDashboard() {
                                     className="issue-input"
                                 />
 
-                                {/* Add Issue Button */}
                                 <button className="create-issue-button" onClick={handleCreateIssue}>
                                     Add Issue
                                 </button>
                             </div>
 
-                            {/* Display Created Issues */}
+                            {/* Created Issues List */}
                             <div className="created-issues">
                                 <h3>Created Issues</h3>
                                 <ul>
@@ -160,6 +139,7 @@ function StudentDashboard() {
                                         <p>No issues created yet.</p>
                                     )}
                                 </ul>
+
                                 {createdIssues.length > 0 && (
                                     <button
                                         className="submit-issues-button"
@@ -172,7 +152,7 @@ function StudentDashboard() {
                         </div>
                     </>
                 ) : (
-                    /* Notifications Section */
+                    // Notifications Panel
                     <div className="section">
                         <h2>Notifications</h2>
                         <ul className="notifications-list">
