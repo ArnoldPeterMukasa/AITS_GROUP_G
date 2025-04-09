@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 # Issue Serializer
 class IssueSerializer(serializers.ModelSerializer):
     reported_by = UserSerializer(read_only=True)  # Display user info
-
+    
     class Meta:
         model = Issue
         fields = ['id', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
@@ -49,6 +49,8 @@ class RegisterSerializer(serializers.ModelSerializer):
     course = serializers.CharField(required=False, allow_blank=True)
     lecturer_id = serializers.CharField(required=False, allow_blank=True)
     academic_title = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(required=True)  # Make first_name required
+    last_name = serializers.CharField(required=True)   # Make last_name required
 
     class Meta:
         model = User
@@ -68,6 +70,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             course=validated_data.get('course', None),
             lecturer_id=validated_data.get('lecturer_id', None),
             academic_title=validated_data.get('academic_title', None),
+            first_name=validated_data.get('first_name'),  # Include first_name
+            last_name=validated_data.get('last_name'),    # Include last_name
         )
         user.set_password(validated_data['password'])  # Hash the password
         user.save()
