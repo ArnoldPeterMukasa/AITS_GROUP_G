@@ -42,3 +42,8 @@ node_modules/
 # VSCode settings (already added, but just for clarity)
 .vscode/
 BACKEND/db.sqlite3
+
+
+.github
+db.sqlite3
+BACKEND/db.sqlite3

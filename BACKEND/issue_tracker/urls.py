@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationListView,RegistrarDashboardView
+from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationViewSet,RegistrarDashboardView
  #UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -11,7 +11,7 @@ urlpatterns = [
     path('users/', UserListView.as_view(), name='user-list'),
     path('issues/', IssueListCreateView.as_view(), name='issue-list-create'),
     path('issues/<int:pk>/', IssueDetailView.as_view(), name='issue-detail'),
-    path('notifications/', NotificationListView.as_view(), name='notification-list'),
+    path('notifications/', NotificationViewSet.as_view(), name='notification-list'),
     path('RegistrarDashboard/', RegistrarDashboardView.as_view(), name='registrar-dashboard'),
     #path('api/RegistrarDashboard/', RegistrarDashboardView.as_view(), name='registrar-dashboard'),
     path('StudentDashboard/', StudentDashboardView.as_view(), name='student_dashboard'),
