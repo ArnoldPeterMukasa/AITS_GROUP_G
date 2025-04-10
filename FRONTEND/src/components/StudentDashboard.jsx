@@ -26,14 +26,34 @@ function StudentDashboard() {
         email: studentData.email,
         registrationNumber: studentData.registrationNumber,
         program: studentData.program,
-        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
+        workedUponIssues: [], // Initially empty
+        createdIssues: [],
     });
 
     const [newIssue, setNewIssue] = useState("");
     const [issueType, setIssueType] = useState("Missing Marks");
-    const [createdIssues, setCreatedIssues] = useState([]);
-    const [submittedIssues, setSubmittedIssues] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+
+    // Fetch data for student dashboard
+    useEffect(() => {
+        if (studentData?.email) {
+            fetchStudentData();
+        }
+    }, [studentData]);
+
+    const fetchStudentData = async () => {
+        try {
+            const response = await fetch(`/api/student/dashboard?email=${studentData.email}`);
+            const data = await response.json();
+            setUser((prevUser) => ({
+                ...prevUser,
+                workedUponIssues: data.notifications || [],
+                createdIssues: data.issues || [],
+            }));
+        } catch (error) {
+            console.error("Error fetching student data:", error);
+        }
+    };
 
     const scrollToWelcome = () => {
         const welcomeSection = document.getElementById("welcome-section");
@@ -44,24 +64,48 @@ function StudentDashboard() {
 
     const handleCreateIssue = () => {
         if (newIssue.trim() !== "") {
-            setCreatedIssues([...createdIssues, { description: newIssue, type: issueType }]);
+            setUser({
+                ...user,
+                createdIssues: [...user.createdIssues, { description: newIssue, type: issueType }],
+            });
             setNewIssue("");
             setIssueType("Missing Marks");
         }
     };
 
-    const handleSubmitIssues = () => {
-        if (createdIssues.length > 0) {
-            setSubmittedIssues([...submittedIssues, ...createdIssues]);
-            setCreatedIssues([]);
-            alert("Issues submitted successfully!");
+    const handleSubmitIssues = async () => {
+        if (user.createdIssues.length > 0) {
+            try {
+                const response = await fetch("/api/issues", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        issues: user.createdIssues,
+                    }),
+                });
+
+                if (response.ok) {
+                    alert("Issues submitted successfully!");
+                    setUser({
+                        ...user,
+                        submittedIssues: [...user.submittedIssues, ...user.createdIssues],
+                        createdIssues: [],
+                    });
+                } else {
+                    alert("Failed to submit issues.");
+                }
+            } catch (error) {
+                alert("Error submitting issues.");
+            }
         } else {
             alert("No issues to submit!");
         }
     };
 
     const handleLogout = () => {
-        navigate("/");
+        navigate("/"); // Log out and navigate to the login page
     };
 
     return (
@@ -93,8 +137,8 @@ function StudentDashboard() {
 
                         {/* Program */}
                         <div className="section">
-                            <h2>course</h2>
-                            <p>{user?.course || "No program available"}</p>
+                            <h2>Course</h2>
+                            <p>{user?.program || "No program available"}</p>
                         </div>
 
                         {/* Create Issue */}
@@ -128,8 +172,8 @@ function StudentDashboard() {
                             <div className="created-issues">
                                 <h3>Created Issues</h3>
                                 <ul>
-                                    {createdIssues.length > 0 ? (
-                                        createdIssues.map((issue, index) => (
+                                    {user.createdIssues.length > 0 ? (
+                                        user.createdIssues.map((issue, index) => (
                                             <li key={index}>
                                                 <strong>Type:</strong> {issue.type} <br />
                                                 <strong>Description:</strong> {issue.description}
@@ -140,7 +184,7 @@ function StudentDashboard() {
                                     )}
                                 </ul>
 
-                                {createdIssues.length > 0 && (
+                                {user.createdIssues.length > 0 && (
                                     <button
                                         className="submit-issues-button"
                                         onClick={handleSubmitIssues}
