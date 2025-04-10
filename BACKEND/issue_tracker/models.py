@@ -18,6 +18,7 @@ class User(AbstractUser):
     course = models.CharField(max_length=100, blank=True, null=True)  # For students
     lecturer_id = models.CharField(max_length=50, blank=True, null=True)  # For lecturers
     academic_title = models.CharField(max_length=100, blank=True, null=True)  # For Academic registrars
+    program = models.CharField(max_length=100, blank=True, null=True)  
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
