@@ -73,10 +73,3 @@ class Notification(models.Model):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
 
-#  Audit Trail Model (Logs actions performed on issues)
-class AuditTrail(models.Model):
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='audit_logs')
-    action_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    action_description = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
-

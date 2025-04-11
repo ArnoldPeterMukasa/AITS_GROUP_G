@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Comment, Notification, AuditTrail
+from .models import Issue, Comment, Notification
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -33,14 +33,6 @@ class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
         fields =['id', 'user', 'issue', 'message', 'is_read', 'created_at']
-
-# Audit Trail Serializer
-class AuditTrailSerializer(serializers.ModelSerializer):
-    action_by = UserSerializer(read_only=True)
-
-    class Meta:
-        model = AuditTrail
-        fields = ['id', 'issue', 'action_by', 'action_description', 'timestamp']
 
 # User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
