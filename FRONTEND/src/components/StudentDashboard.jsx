@@ -6,6 +6,7 @@ function StudentDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
 
+<<<<<<< Updated upstream
     // Redirect to login if studentData is not passed in state
     useEffect(() => {
         if (!location.state?.studentData) {
@@ -14,6 +15,8 @@ function StudentDashboard() {
     }, [location.state, navigate]);
 
     // Default to empty data to avoid undefined errors before redirect
+=======
+>>>>>>> Stashed changes
     const studentData = location.state?.studentData || {
         name: "",
         email: "",
@@ -26,7 +29,7 @@ function StudentDashboard() {
         email: studentData.email,
         registrationNumber: studentData.registrationNumber,
         program: studentData.program,
-        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
+        workedUponIssues: [],
     });
 
     const [newIssue, setNewIssue] = useState("");
@@ -64,6 +67,31 @@ function StudentDashboard() {
         navigate("/");
     };
 
+<<<<<<< Updated upstream
+=======
+    // Fetch notifications from the Django backend
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/api/notifications/");
+                const data = await response.json();
+                if (data.notifications) {
+                    setUser((prevUser) => ({
+                        ...prevUser,
+                        workedUponIssues: data.notifications
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        if (showNotifications) {
+            fetchNotifications();
+        }
+    }, [showNotifications]);
+
+>>>>>>> Stashed changes
     return (
         <div className="dashboard-container">
             {/* Header */}
@@ -101,16 +129,23 @@ function StudentDashboard() {
                         <div className="section">
                             <h2>Create Issue</h2>
                             <div className="create-issue-form">
+<<<<<<< Updated upstream
                                 <select
                                     value={issueType}
                                     onChange={(e) => setIssueType(e.target.value)}
                                     className="issue-dropdown"
                                 >
+=======
+                                <select value={issueType} onChange={(e) => setIssueType(e.target.value)} className="issue-dropdown">
+>>>>>>> Stashed changes
                                     <option value="Missing Marks">Missing Marks</option>
                                     <option value="Appeal">Appeal</option>
                                     <option value="Correction for Marks">Correction for Marks</option>
                                 </select>
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
                                 <input
                                     type="text"
                                     placeholder="Enter issue description"
@@ -118,10 +153,14 @@ function StudentDashboard() {
                                     onChange={(e) => setNewIssue(e.target.value)}
                                     className="issue-input"
                                 />
+<<<<<<< Updated upstream
 
                                 <button className="create-issue-button" onClick={handleCreateIssue}>
                                     Add Issue
                                 </button>
+=======
+                                <button className="create-issue-button" onClick={handleCreateIssue}>Add Issue</button>
+>>>>>>> Stashed changes
                             </div>
 
                             {/* Created Issues List */}
@@ -141,26 +180,23 @@ function StudentDashboard() {
                                 </ul>
 
                                 {createdIssues.length > 0 && (
-                                    <button
-                                        className="submit-issues-button"
-                                        onClick={handleSubmitIssues}
-                                    >
-                                        Submit Issues
-                                    </button>
+                                    <button className="submit-issues-button" onClick={handleSubmitIssues}>Submit Issues</button>
                                 )}
                             </div>
                         </div>
                     </>
                 ) : (
+<<<<<<< Updated upstream
                     // Notifications Panel
+=======
+                    // Notifications Section
+>>>>>>> Stashed changes
                     <div className="section">
                         <h2>Notifications</h2>
                         <ul className="notifications-list">
                             {user?.workedUponIssues?.length > 0 ? (
                                 user.workedUponIssues.map((message, index) => (
-                                    <li key={index} className="notification-item">
-                                        {message}
-                                    </li>
+                                    <li key={index} className="notification-item">{message}</li>
                                 ))
                             ) : (
                                 <p>No notifications available.</p>
