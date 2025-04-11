@@ -6,7 +6,7 @@ function LecturerDashboard() {
     const [issues, setIssues] = useState([]);
     const [assignments, setAssignments] = useState([]);
     const [notifications] = useState(["New assignment posted!", "Course content updated"]);
-    const [courseContent, setCourseContent] = useState([
+    const [courseContent] = useState([
         { id: 1, title: "Lecture 1 - Introduction to Programming", dateUploaded: "2025-03-15" },
         { id: 2, title: "Lecture 2 - Data Structures", dateUploaded: "2025-03-18" }
     ]);
