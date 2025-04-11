@@ -370,3 +370,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'], url_path='mark-as-read')
     def mark_as_read(self, request, pk=None):
         notification = self.get_oject()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'mark as read'})
