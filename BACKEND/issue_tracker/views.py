@@ -357,9 +357,9 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
             send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
             
 #  Get User Notifications
-class NotificationViewSet(generics.ListAPIView):
+class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user)
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
