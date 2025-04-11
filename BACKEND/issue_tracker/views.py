@@ -363,3 +363,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        
+    @action(detail=True, methods=['patch'], url_path='mark-as-read')
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_oject()
