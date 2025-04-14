@@ -124,70 +124,73 @@ class StudentDashboardView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsStudent]
 
+    
+
     def get(self, request):
         try:
             student = request.user
 
-            # Add registration number to student info
+            # Ensure required attributes exist
             student_info = {
                 'name': f"{student.first_name} {student.last_name}",
                 'email': student.email,
-                'registration_number': student.registration_number,
-                'course': student.course,
+                'registration_number': getattr(student, 'registration_number', 'N/A'),
+                'course': getattr(student, 'course', 'N/A'),
+                'program': getattr(student, 'program', 'N/A')
             }
 
-            try:
-                issues = Issue.objects.filter(reported_by=student)
+            # Query issues reported by the student
+            issues = Issue.objects.filter(reported_by=student)
 
-                # Filter handling
-                status_filter = request.query_params.get('status')
-                category = request.query_params.get('category')
-                date_range = request.query_params.get('date_range')
+            # Apply filters
+            status_filter = request.query_params.get('status')
+            category = request.query_params.get('category')
+            date_range = request.query_params.get('date_range')
 
-                if status_filter and status_filter.lower() != 'all':
-                    issues = issues.filter(status=status_filter)
-                if category:
-                    issues = issues.filter(category=category)
-                if date_range:
-                    # Add date range filtering if needed
-                    pass
+            if status_filter and status_filter.lower() != 'all':
+                issues = issues.filter(status=status_filter)
+            if category:
+                issues = issues.filter(category=category)
+            if date_range:
+                # Add date range filtering logic if needed
+                pass
 
-                analytics = {
-                    'totalIssues': issues.count(),
-                    'resolvedIssues': issues.filter(status='resolved').count(),
-                    'pendingIssues': issues.filter(status='pending').count(),
-                    'inProgressIssues': issues.filter(status='in_progress').count(),
-                    'recentActivity': issues.filter(
-                        updated_at__gte=datetime.now() - timedelta(days=7)
-                    ).count()
+            # Analytics
+            analytics = {
+                'totalIssues': issues.count(),
+                'resolvedIssues': issues.filter(status='resolved').count(),
+                'pendingIssues': issues.filter(status='pending').count(),
+                'inProgressIssues': issues.filter(status='in_progress').count(),
+                'recentActivity': issues.filter(
+                    updated_at__gte=datetime.now() - timedelta(days=7)
+                ).count()
+            }
+
+            # Notifications
+            notifications = Notification.objects.filter(user=student, is_read=False)
+
+            return Response({
+                'status': 'success',
+                'student': student_info,
+                'analytics': analytics,
+                'issues': IssueSerializer(issues, many=True).data,
+                'notifications': NotificationSerializer(notifications, many=True).data,
+                'filters': {
+                    'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
+                    'categories': ['missing_marks', 'appeal', 'correction', 'other'],
+                    'dateRanges': ['today', 'week', 'month', 'all']
                 }
+            }, status=status.HTTP_200_OK)
 
-                return Response({
-                    'status': 'success',
-                    'student': student_info,
-                    'analytics': analytics,
-                    'issues': IssueSerializer(issues, many=True).data,
-                    'notifications': NotificationSerializer(
-                        Notification.objects.filter(user=student, is_read=False),
-                        many=True
-                    ).data,
-                    'filters': {
-                        'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
-                        'categories': ['missing_marks', 'appeal', 'correction', 'other'],
-                        'dateRanges': ['today', 'week', 'month', 'all']
-                    }
-                }, status=status.HTTP_200_OK)
-
-            except Issue.DoesNotExist:
-                return Response({
-                    'status': 'error',
-                    'message': 'No issues found for this student'
-                }, status=status.HTTP_404_NOT_FOUND)
-
+        except AttributeError as e:
+            return Response({
+                'status': 'error',
+                'message': f"Attribute error: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             return Response({
                 'status': 'error',
-                'message': str(e)
+                'message': f"An unexpected error occurred: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class LecturerDashboardView(APIView):
