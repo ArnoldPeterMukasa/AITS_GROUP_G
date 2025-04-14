@@ -1,5 +1,6 @@
 # Description: This file contains the views for the issue_tracker app.
-from rest_framework import generics, permissions,status,serializers
+from rest_framework import generics, permissions,status,serializers, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
@@ -16,7 +17,11 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.timezone import now
+
 from rest_framework import permissions
+
+from rest_framework import status
+
 
 User = get_user_model()
 
@@ -131,29 +136,26 @@ class StudentDashboardView(APIView):
             student_info = {
                 'name': f"{student.first_name} {student.last_name}",
                 'email': student.email,
-                'registration_number': student.registration_number,  # Add this field
+                'registration_number': student.registration_number,
                 'course': student.course,
-                'program': student.program  # Add this if available
             }
 
-            # Query with error handling
             try:
                 issues = Issue.objects.filter(reported_by=student)
-                
+
                 # Filter handling
-                status = request.query_params.get('status')
+                status_filter = request.query_params.get('status')
                 category = request.query_params.get('category')
                 date_range = request.query_params.get('date_range')
 
-                if status and status.lower() != 'all':
-                    issues = issues.filter(status=status)
+                if status_filter and status_filter.lower() != 'all':
+                    issues = issues.filter(status=status_filter)
                 if category:
                     issues = issues.filter(category=category)
                 if date_range:
                     # Add date range filtering if needed
                     pass
 
-                # Enhanced analytics
                 analytics = {
                     'totalIssues': issues.count(),
                     'resolvedIssues': issues.filter(status='resolved').count(),
@@ -359,11 +361,19 @@ class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
             send_mail(subject, message, 'your_email@gmail.com', [student.email], fail_silently=False)
             
 #  Get User Notifications
-class NotificationListView(generics.ListAPIView):
+class NotificationViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Notification.objects.filter(user=self.request.user)
-
-
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        
+    @action(detail=True, methods=['patch'], url_path='mark-as-read')
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_oject()
+        notification.is_read = True
+        notification.save()
+        return Response({'status': 'mark as read'})

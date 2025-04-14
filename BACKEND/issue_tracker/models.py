@@ -18,6 +18,7 @@ class User(AbstractUser):
     course = models.CharField(max_length=100, blank=True, null=True)  # For students
     lecturer_id = models.CharField(max_length=50, blank=True, null=True)  # For lecturers
     academic_title = models.CharField(max_length=100, blank=True, null=True)  # For Academic registrars
+    program = models.CharField(max_length=100, blank=True, null=True)  
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
@@ -71,11 +72,4 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
-
-#  Audit Trail Model (Logs actions performed on issues)
-class AuditTrail(models.Model):
-    issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='audit_logs')
-    action_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    action_description = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
 

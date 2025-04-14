@@ -82,7 +82,7 @@ const NotificationTypes = {
                 checked={inAppNotifications}
                 onChange={toggleInAppNotifications}
             />
-            Enable In-App Notifications
+            Enable In App Notifications
             </label>
         </div>
         </div>

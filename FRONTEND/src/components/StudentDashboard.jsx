@@ -26,8 +26,7 @@ function StudentDashboard() {
         email: studentData.email,
         registrationNumber: studentData.registrationNumber,
         program: studentData.program,
-        workedUponIssues: [], // Initially empty
-        createdIssues: [],
+        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
     });
 
     const [newIssue, setNewIssue] = useState("");
@@ -108,6 +107,28 @@ function StudentDashboard() {
         navigate("/"); // Log out and navigate to the login page
     };
 
+    // Fetch notifications from the Django backend
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/api/notifications/");
+                const data = await response.json();
+                if (data.notifications) {
+                    setUser((prevUser) => ({
+                        ...prevUser,
+                        workedUponIssues: data.notifications
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+            }
+        };
+
+        if (showNotifications) {
+            fetchNotifications();
+        }
+    }, [showNotifications]);
+
     return (
         <div className="dashboard-container">
             {/* Header */}
@@ -154,7 +175,6 @@ function StudentDashboard() {
                                     <option value="Appeal">Appeal</option>
                                     <option value="Correction for Marks">Correction for Marks</option>
                                 </select>
-
                                 <input
                                     type="text"
                                     placeholder="Enter issue description"
@@ -184,7 +204,7 @@ function StudentDashboard() {
                                     )}
                                 </ul>
 
-                                {user.createdIssues.length > 0 && (
+                                {createdIssues.length > 0 && (
                                     <button
                                         className="submit-issues-button"
                                         onClick={handleSubmitIssues}
@@ -202,9 +222,7 @@ function StudentDashboard() {
                         <ul className="notifications-list">
                             {user?.workedUponIssues?.length > 0 ? (
                                 user.workedUponIssues.map((message, index) => (
-                                    <li key={index} className="notification-item">
-                                        {message}
-                                    </li>
+                                    <li key={index} className="notification-item">{message}</li>
                                 ))
                             ) : (
                                 <p>No notifications available.</p>

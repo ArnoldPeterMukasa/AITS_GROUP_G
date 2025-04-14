@@ -43,6 +43,7 @@ li {
     margin-bottom: 12px;
     background-color: #f8f8f8;
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 li:hover {
@@ -50,6 +51,18 @@ li:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Read vs Unread Notifications */
+li.unread {
+    background-color: #f0f8ff;
+    font-weight: bold;
+}
+
+li.read {
+    background-color: white;
+    font-weight: normal;
+}
+
+/* Notification Type Badge */
 .notification-type {
     font-weight: bold;
     display: inline-block;
@@ -62,33 +75,26 @@ li:hover {
 /* Notification Types */
 .notification-type.New-Issue {
     background-color: #e74c3c;
-    /* Red for new issue */
 }
 
 .notification-type.Escalation {
     background-color: #f39c12;
-    /* Orange for escalation */
 }
 
 .notification-type.Resolved {
     background-color: #2ecc71;
-    /* Green for resolved */
 }
 
 .notification-type.System-Update {
     background-color: #3498db;
-    /* Blue for system update */
 }
 
-/* Read vs Unread Notifications */
-li.unread {
-    background-color: #f0f8ff;
-    font-weight: bold;
-}
-
-li.read {
-    background-color: white;
-    font-weight: normal;
+/* Timestamp */
+.timestamp {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 5px;
 }
 
 /* Preferences Section */
@@ -115,6 +121,42 @@ li.read {
     margin-right: 10px;
 }
 
+/* Filter Section */
+.filter-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.filter-section select {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.action-buttons button {
+    background-color: #3498db;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons button:hover {
+    background-color: #2980b9;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .notifications {
@@ -132,5 +174,11 @@ li.read {
 
     li {
         font-size: 14px;
+    }
+
+    .filter-section select,
+    .action-buttons button {
+        font-size: 13px;
+        padding: 6px 10px;
     }
 }

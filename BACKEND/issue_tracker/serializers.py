@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Comment, Notification, AuditTrail
+from .models import Issue, Comment, Notification
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -34,14 +34,6 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields =['id', 'user', 'issue', 'message', 'is_read', 'created_at']
 
-# Audit Trail Serializer
-class AuditTrailSerializer(serializers.ModelSerializer):
-    action_by = UserSerializer(read_only=True)
-
-    class Meta:
-        model = AuditTrail
-        fields = ['id', 'issue', 'action_by', 'action_description', 'timestamp']
-
 # User Registration Serializer
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -51,13 +43,14 @@ class RegisterSerializer(serializers.ModelSerializer):
     academic_title = serializers.CharField(required=False, allow_blank=True)
     first_name = serializers.CharField(required=True)  # Make first_name required
     last_name = serializers.CharField(required=True)   # Make last_name required
+    program = serializers.CharField(required= False, allow_blank=True)
 
     class Meta:
         model = User
         fields = [
             'username', 'email', 'password', 'user_type', 'department',
             'first_name', 'last_name',
-            'registration_number', 'course', 'lecturer_id', 'academic_title'
+            'registration_number', 'course', 'lecturer_id', 'academic_title','program'
         ]
 
     def create(self, validated_data):
@@ -72,6 +65,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             academic_title=validated_data.get('academic_title', None),
             first_name=validated_data.get('first_name'),  # Include first_name
             last_name=validated_data.get('last_name'),    # Include last_name
+            program=validated_data.get('program',None),
         )
         user.set_password(validated_data['password'])  # Hash the password
         user.save()
