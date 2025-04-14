@@ -6,7 +6,6 @@ function StudentDashboard() {
     const navigate = useNavigate();
     const location = useLocation();
 
-<<<<<<< Updated upstream
     // Redirect to login if studentData is not passed in state
     useEffect(() => {
         if (!location.state?.studentData) {
@@ -15,8 +14,6 @@ function StudentDashboard() {
     }, [location.state, navigate]);
 
     // Default to empty data to avoid undefined errors before redirect
-=======
->>>>>>> Stashed changes
     const studentData = location.state?.studentData || {
         name: "",
         email: "",
@@ -67,8 +64,6 @@ function StudentDashboard() {
         navigate("/");
     };
 
-<<<<<<< Updated upstream
-=======
     // Fetch notifications from the Django backend
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -91,7 +86,6 @@ function StudentDashboard() {
         }
     }, [showNotifications]);
 
->>>>>>> Stashed changes
     return (
         <div className="dashboard-container">
             {/* Header */}
@@ -129,23 +123,15 @@ function StudentDashboard() {
                         <div className="section">
                             <h2>Create Issue</h2>
                             <div className="create-issue-form">
-<<<<<<< Updated upstream
                                 <select
                                     value={issueType}
                                     onChange={(e) => setIssueType(e.target.value)}
                                     className="issue-dropdown"
                                 >
-=======
-                                <select value={issueType} onChange={(e) => setIssueType(e.target.value)} className="issue-dropdown">
->>>>>>> Stashed changes
                                     <option value="Missing Marks">Missing Marks</option>
                                     <option value="Appeal">Appeal</option>
                                     <option value="Correction for Marks">Correction for Marks</option>
                                 </select>
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
                                 <input
                                     type="text"
                                     placeholder="Enter issue description"
@@ -153,14 +139,10 @@ function StudentDashboard() {
                                     onChange={(e) => setNewIssue(e.target.value)}
                                     className="issue-input"
                                 />
-<<<<<<< Updated upstream
 
                                 <button className="create-issue-button" onClick={handleCreateIssue}>
                                     Add Issue
                                 </button>
-=======
-                                <button className="create-issue-button" onClick={handleCreateIssue}>Add Issue</button>
->>>>>>> Stashed changes
                             </div>
 
                             {/* Created Issues List */}
@@ -186,11 +168,7 @@ function StudentDashboard() {
                         </div>
                     </>
                 ) : (
-<<<<<<< Updated upstream
                     // Notifications Panel
-=======
-                    // Notifications Section
->>>>>>> Stashed changes
                     <div className="section">
                         <h2>Notifications</h2>
                         <ul className="notifications-list">
