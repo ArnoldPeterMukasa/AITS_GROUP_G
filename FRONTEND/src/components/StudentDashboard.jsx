@@ -26,7 +26,8 @@ function StudentDashboard() {
         email: studentData.email,
         registrationNumber: studentData.registrationNumber,
         program: studentData.program,
-        workedUponIssues: ["Issue A has been resolved", "Issue B has been reviewed"],
+        workedUponIssues: [],
+        createdIssues: [],
     });
 
     const [newIssue, setNewIssue] = useState("");
@@ -174,44 +175,29 @@ function StudentDashboard() {
                                     <option value="Missing Marks">Missing Marks</option>
                                     <option value="Appeal">Appeal</option>
                                     <option value="Correction for Marks">Correction for Marks</option>
+                                    <option value="Other">Other</option>
                                 </select>
                                 <input
                                     type="text"
-                                    placeholder="Enter issue description"
+                                    placeholder="Enter issue description (max 200 characters)"
                                     value={newIssue}
-                                    onChange={(e) => setNewIssue(e.target.value)}
+                                    onChange={(e) => {
+                                        if (e.target.value.length <= 200) {
+                                            setNewIssue(e.target.value);
+                                        }
+                                    }}
                                     className="issue-input"
                                 />
-
-                                <button className="create-issue-button" onClick={handleCreateIssue}>
+                                {newIssue.length > 200 && (
+                                    <p className="error-message">Description cannot exceed 200 characters.</p>
+                                )}
+                                <button
+                                    className="create-issue-button"
+                                    onClick={handleCreateIssue}
+                                    disabled={newIssue.trim() === ""}
+                                >
                                     Add Issue
                                 </button>
-                            </div>
-
-                            {/* Created Issues List */}
-                            <div className="created-issues">
-                                <h3>Created Issues</h3>
-                                <ul>
-                                    {user.createdIssues.length > 0 ? (
-                                        user.createdIssues.map((issue, index) => (
-                                            <li key={index}>
-                                                <strong>Type:</strong> {issue.type} <br />
-                                                <strong>Description:</strong> {issue.description}
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <p>No issues created yet.</p>
-                                    )}
-                                </ul>
-
-                                {createdIssues.length > 0 && (
-                                    <button
-                                        className="submit-issues-button"
-                                        onClick={handleSubmitIssues}
-                                    >
-                                        Submit Issues
-                                    </button>
-                                )}
                             </div>
                         </div>
                     </>
