@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationViewSet,RegistrarDashboardView
- #UnassignedIssuesView, AssignIssueView
+#UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
