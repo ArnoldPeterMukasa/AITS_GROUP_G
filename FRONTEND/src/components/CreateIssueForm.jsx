@@ -19,6 +19,7 @@ function CreateIssueForm() {
                 setDescription(""); // Clear the description field
                 setType("Missing Marks"); // Reset the type field
             } else {
+                
                 setMessage("Failed to create issue. Please try again.");
             }
         } catch (error) {
