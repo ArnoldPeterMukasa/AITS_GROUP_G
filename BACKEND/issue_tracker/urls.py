@@ -1,4 +1,4 @@
-from django.urls import path,include
+from django.urls import path
 from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, UserListView, IssueListCreateView, IssueDetailView, NotificationViewSet,RegistrarDashboardView
  #UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
