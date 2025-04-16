@@ -17,14 +17,16 @@ function AcademicRegistrarDashboard() {
     const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
     const navigate = useNavigate();
 
-    // Fetch data from the backend API
+    // ✅ Fetch data from the backend API
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = localStorage.getItem('authToken'); // ✅ Correct token key
+
                 const response = await fetch('http://127.0.0.1:8000/api/RegistrarDashboard/', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Include token if required
+                        'Authorization': `Bearer ${token}`, // ✅ Token used correctly
                         'Content-Type': 'application/json',
                     },
                 });
@@ -61,8 +63,8 @@ function AcademicRegistrarDashboard() {
     });
 
     const handleLogout = () => {
-        localStorage.removeItem("authToken"); // Clear token
-        navigate("/login"); // Navigate to the login page
+        localStorage.removeItem("authToken"); // ✅ Match with what we retrieved
+        navigate("/login");
     };
 
     return (
