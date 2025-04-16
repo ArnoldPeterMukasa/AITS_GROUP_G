@@ -17,10 +17,11 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.timezone import now
-
 from rest_framework import permissions
-
 from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 
 
 User = get_user_model()
@@ -69,11 +70,10 @@ class ResetPasswordConfirmView(APIView):
         except (User.DoesNotExist, ValueError):
             return Response({"error": "Invalid user or token"}, status=404)
 
-
-#user registration
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all() #optional but a good practice
-    serializer_class = RegisterSerializer #defines a serializer for the user registration
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny] #defines a serializer for the user registration
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -123,80 +123,81 @@ class RegistrarDashboardView(APIView):
             "overdue_issues_count": overdue_issues_count,
         }
         return Response(data)
-        
+
+
 class StudentDashboardView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsStudent]
-
-    
 
     def get(self, request):
         try:
             student = request.user
 
-            # Ensure required attributes exist
+            # add reistration  number to student info
             student_info = {
                 'name': f"{student.first_name} {student.last_name}",
                 'email': student.email,
-                'registration_number': getattr(student, 'registration_number', 'N/A'),
-                'course': getattr(student, 'course', 'N/A'),
-                'program': getattr(student, 'program', 'N/A')
+                'registration_number': student.registration_number,
+                'course': student.course,
+                #'program': getattr(student, 'program', 'N/A')
             }
+            try:
+                issues = Issue.objects.filter(reported_by=student)
 
-            # Query issues reported by the student
-            issues = Issue.objects.filter(reported_by=student)
+                #filter handling
+                status_filter = request.query_params.get('status')
+                category = request.query_params.get('category')
+                date_range = request.query_params.get('date_range')
 
-            # Apply filters
-            status_filter = request.query_params.get('status')
-            category = request.query_params.get('category')
-            date_range = request.query_params.get('date_range')
+                if status_filter and status_filter.lower() != 'all':
+                    issues = issues.filter(status=status_filter)
+                if category:
+                    issues = issues.filter(category=category)
+                if date_range:
+                    # Add date range filtering logic if needed
+                    pass
 
-            if status_filter and status_filter.lower() != 'all':
-                issues = issues.filter(status=status_filter)
-            if category:
-                issues = issues.filter(category=category)
-            if date_range:
-                # Add date range filtering logic if needed
-                pass
-
-            # Analytics
-            analytics = {
-                'totalIssues': issues.count(),
-                'resolvedIssues': issues.filter(status='resolved').count(),
-                'pendingIssues': issues.filter(status='pending').count(),
-                'inProgressIssues': issues.filter(status='in_progress').count(),
-                'recentActivity': issues.filter(
-                    updated_at__gte=datetime.now() - timedelta(days=7)
-                ).count()
-            }
-
-            # Notifications
-            notifications = Notification.objects.filter(user=student, is_read=False)
-
-            return Response({
-                'status': 'success',
-                'student': student_info,
-                'analytics': analytics,
-                'issues': IssueSerializer(issues, many=True).data,
-                'notifications': NotificationSerializer(notifications, many=True).data,
-                'filters': {
-                    'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
-                    'categories': ['missing_marks', 'appeal', 'correction', 'other'],
-                    'dateRanges': ['today', 'week', 'month', 'all']
+                # Analytics
+                analytics = {
+                    'totalIssues': issues.count(),
+                    'resolvedIssues': issues.filter(status='resolved').count(),
+                    'pendingIssues': issues.filter(status='pending').count(),
+                    'inProgressIssues': issues.filter(status='in_progress').count(),
+                    'recentActivity': issues.filter(
+                        updated_at__gte=datetime.now() - timedelta(days=7)
+                    ).count()
                 }
-            }, status=status.HTTP_200_OK)
 
-        except AttributeError as e:
-            return Response({
-                'status': 'error',
-                'message': f"Attribute error: {str(e)}"
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                # Notifications
+                notifications = Notification.objects.filter(user=student, is_read=False)
+
+                return Response({
+                    'status': 'success',
+                    'student': student_info,
+                    'analytics': analytics,
+                    'issues': IssueSerializer(issues, many=True).data,
+                    'notifications': NotificationSerializer(notifications, many=True).data,
+                    'filters': {
+                        'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
+                        'categories': ['missing_marks', 'appeal', 'correction', 'other'],
+                        'dateRanges': ['today', 'week', 'month', 'all']
+                    }
+                }, status=status.HTTP_200_OK)
+
+            except Issue.DoesNotExist:
+                return Response({
+                    'status': 'error',
+                    'message': 'No issues found for the student.'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
         except Exception as e:
             return Response({
                 'status': 'error',
                 'message': f"An unexpected error occurred: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
+
 class LecturerDashboardView(APIView):
     authentication_classes = [JWTAuthentication]  # Secure API with JWT
     permission_classes = [IsLecturer]  # Restrict access to lecturers only
@@ -298,19 +299,38 @@ class LoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )'''
 
-            
-    
+class RegistrarIssueListView(APIView):
+    permission_classes = [IsAuthenticated, IsRegistrar]
 
-# Get List of Users (for frontend to display user info)
-class UserListView(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated, IsRegistrar] # Only Registrar can access
+    def get(self, request):
+        issues = Issue.objects.all().order_by('-created_at')
+        serialized = IssueSerializer(issues, many=True)
+        return Response({'status': 'success', 'issues': serialized.data})
+
+class AssignIssueView(APIView):
+    permission_classes = [IsAuthenticated, IsRegistrar]
+
+    def patch(self, request, pk):
+        
+        lecturer_username = request.data.get('lecturer_username')
+        lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+        issue = get_object_or_404(Issue, pk=pk)
+
+        try:
+            lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+            issue.assigned_to = lecturer
+            issue.status = 'assigned'
+            issue.save()
+            return Response({'message': 'Issue assigned successfully'}, status=200)
+        except User.DoesNotExist:
+            return Response({'error': 'Lecturer not found'}, status=400)    
+
 
 # Create and List Issues
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
+    authntication_classes = [JWTAuthentication] 
     permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
 
     def get_queryset(self): # Only return issues created by the current student
@@ -321,7 +341,11 @@ class IssueListCreateView(generics.ListCreateAPIView):
         try:
             # Get the registrar who will be assigned to the issue
             registrar = User.objects.filter(user_type='registrar').first()
-            
+
+            if not registrar:
+                raise serializers.ValidationError("No registrar found to assign the issue.")
+
+                
             # Save the issue with the current student as reported_by
             issue = serializer.save(
                 reported_by=self.request.user,
@@ -337,11 +361,15 @@ class IssueListCreateView(generics.ListCreateAPIView):
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating issue: {str(e)}")
-    '''def perform_create(self, serializer):
-        user = self.request.user
-        user.refresh_from_db()  # Ensure the user object is up-to-date
-        serializer.save(reported_by=user)
-        #serializer.save(reported_by=self.request.user)  # Assign current users as the reported_by'''
+
+
+# List all issues (for lecturers)
+@api_view(['GET'])
+def lecturer_list(request):
+    lecturers = User.objects.filter(user_type='lecturer')
+    data = [{"username": l.username, "name": f"{l.first_name} {l.last_name}"} for l in lecturers]
+    return Response(data)
+
 
 #  Retrieve, Update, and Delete an Issue
 class IssueDetailView(generics.RetrieveUpdateDestroyAPIView):
