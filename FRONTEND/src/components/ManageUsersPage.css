@@ -61,3 +61,18 @@ button:hover {
 button:disabled {
     background-color: #ccc;
 }
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    animation: fade 3s ease-in-out forwards;
+}
+
+@keyframes fade {
+    0% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+}

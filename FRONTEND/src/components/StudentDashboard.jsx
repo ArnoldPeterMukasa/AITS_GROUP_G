@@ -1,59 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
+import { fetchStudentProfile, setAuthToken } from "./Api";
+import CreateIssueForm from "./CreateIssueForm";
+
 
 function StudentDashboard() {
     const navigate = useNavigate();
-    const location = useLocation();
-
-    // Redirect to login if studentData is not passed in state
-    useEffect(() => {
-        if (!location.state?.studentData) {
-            navigate("/login"); // Redirect to login if student info is missing
-        }
-    }, [location.state, navigate]);
-
-    // Default to empty data to avoid undefined errors before redirect
-    const studentData = location.state?.studentData || {
-        name: "",
-        email: "",
-        registrationNumber: "",
-        program: ""
-    };
 
     const [user, setUser] = useState({
-        name: studentData.name,
-        email: studentData.email,
-        registrationNumber: studentData.registrationNumber,
-        program: studentData.program,
+        name: "Loading...",
+        email: "Loading...",
+        registration_number: "Loading...",
+        course: "Loading...",
         workedUponIssues: [],
-        createdIssues: [],
     });
 
-    const [newIssue, setNewIssue] = useState("");
-    const [issueType, setIssueType] = useState("Missing Marks");
     const [showNotifications, setShowNotifications] = useState(false);
-
-    // Fetch data for student dashboard
-    useEffect(() => {
-        if (studentData?.email) {
-            fetchStudentData();
-        }
-    }, [studentData]);
-
-    const fetchStudentData = async () => {
-        try {
-            const response = await fetch(`/api/student/dashboard?email=${studentData.email}`);
-            const data = await response.json();
-            setUser((prevUser) => ({
-                ...prevUser,
-                workedUponIssues: data.notifications || [],
-                createdIssues: data.issues || [],
-            }));
-        } catch (error) {
-            console.error("Error fetching student data:", error);
-        }
-    };
+    const [issues, setIssues] = useState([]);
 
     const scrollToWelcome = () => {
         const welcomeSection = document.getElementById("welcome-section");
@@ -62,73 +26,60 @@ function StudentDashboard() {
         }
     };
 
-    const handleCreateIssue = () => {
-        if (newIssue.trim() !== "") {
-            setUser({
-                ...user,
-                createdIssues: [...user.createdIssues, { description: newIssue, type: issueType }],
-            });
-            setNewIssue("");
-            setIssueType("Missing Marks");
-        }
-    };
-
-    const handleSubmitIssues = async () => {
-        if (user.createdIssues.length > 0) {
-            try {
-                const response = await fetch("/api/issues", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        issues: user.createdIssues,
-                    }),
-                });
-
-                if (response.ok) {
-                    alert("Issues submitted successfully!");
-                    setUser({
-                        ...user,
-                        submittedIssues: [...user.submittedIssues, ...user.createdIssues],
-                        createdIssues: [],
-                    });
-                } else {
-                    alert("Failed to submit issues.");
-                }
-            } catch (error) {
-                alert("Error submitting issues.");
-            }
-        } else {
-            alert("No issues to submit!");
-        }
-    };
-
     const handleLogout = () => {
-        navigate("/"); // Log out and navigate to the login page
+        localStorage.removeItem('authToken');
+        navigate("/");
     };
 
-    // Fetch notifications from the Django backend
     useEffect(() => {
-        const fetchNotifications = async () => {
+        const fetchData = async () => {
             try {
-                const response = await fetch("http://localhost:8000/api/notifications/");
-                const data = await response.json();
-                if (data.notifications) {
-                    setUser((prevUser) => ({
-                        ...prevUser,
-                        workedUponIssues: data.notifications
-                    }));
+                const token = localStorage.getItem('authToken');
+
+                if (!token) {
+                    console.error("No auth token found");
+                    navigate("/");
+                    return;
+                }
+
+                // Set token for API requests
+                setAuthToken(token);
+
+                const profileData = await fetchStudentProfile();
+
+                if (profileData.status === 'success' && profileData.student) {
+                    const { name, email, registration_number, course } = profileData.student;
+
+                    setUser({
+                        name: name || "N/A",
+                        email: email || "N/A",
+                        registration_number: registration_number || "N/A",
+                        course: course || "N/A",
+                        workedUponIssues: profileData.notifications?.map(n => n.message) || [],
+                    });
+
+                    if (profileData.issues) {
+                        setIssues(profileData.issues);
+                    }
+                } else {
+                    console.error("Failed to fetch profile data");
                 }
             } catch (error) {
-                console.error("Error fetching notifications:", error);
+                console.error("Error fetching data:", error);
+
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('authToken');
+                    navigate("/");
+                }
             }
         };
 
-        if (showNotifications) {
-            fetchNotifications();
-        }
-    }, [showNotifications]);
+        fetchData();
+    }, [navigate]);
+
+    const handleIssueCreated = (newIssue) => {
+        setIssues(prevIssues => [...prevIssues, newIssue]);
+    };
 
     return (
         <div className="dashboard-container">
@@ -154,55 +105,46 @@ function StudentDashboard() {
                             <h2>Your Profile</h2>
                             <p><strong>Name:</strong> {user?.name || "N/A"}</p>
                             <p><strong>Email:</strong> {user?.email || "N/A"}</p>
-                            <p><strong>Registration Number:</strong> {user?.registrationNumber || "N/A"}</p>
+                            <p><strong>Registration Number:</strong> {user?.registration_number || "N/A"}</p>
                         </div>
 
-                        {/* Program */}
+                        {/* Course Info */}
                         <div className="section">
                             <h2>Course</h2>
-                            <p>{user?.program || "No program available"}</p>
+                            <p>{user?.course || "No course available"}</p>
                         </div>
 
                         {/* Create Issue */}
                         <div className="section">
                             <h2>Create Issue</h2>
-                            <div className="create-issue-form">
-                                <select
-                                    value={issueType}
-                                    onChange={(e) => setIssueType(e.target.value)}
-                                    className="issue-dropdown"
-                                >
-                                    <option value="Missing Marks">Missing Marks</option>
-                                    <option value="Appeal">Appeal</option>
-                                    <option value="Correction for Marks">Correction for Marks</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    placeholder="Enter issue description (max 200 characters)"
-                                    value={newIssue}
-                                    onChange={(e) => {
-                                        if (e.target.value.length <= 200) {
-                                            setNewIssue(e.target.value);
-                                        }
-                                    }}
-                                    className="issue-input"
-                                />
-                                {newIssue.length > 200 && (
-                                    <p className="error-message">Description cannot exceed 200 characters.</p>
-                                )}
-                                <button
-                                    className="create-issue-button"
-                                    onClick={handleCreateIssue}
-                                    disabled={newIssue.trim() === ""}
-                                >
-                                    Add Issue
-                                </button>
-                            </div>
+                            <CreateIssueForm onIssueCreated={handleIssueCreated} />
+                        </div>
+
+                        {/* Display Issues */}
+                        <div className="section">
+                            <h2>Your Issues</h2>
+                            {issues.length > 0 ? (
+                                <ul className="issues-list">
+                                    {issues.map((issue, index) => (
+                                        <li key={index} className="issue-item">
+                                            <div className="issue-header">
+                                                <span className="issue-category">{issue.category}</span>
+                                                <span className={`issue-status status-${issue.status}`}>{issue.status}</span>
+                                            </div>
+                                            <div className="issue-description">{issue.description}</div>
+                                            <div className="issue-date">
+                                                Created: {new Date(issue.created_at).toLocaleDateString()}
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>No issues submitted yet.</p>
+                            )}
                         </div>
                     </>
                 ) : (
-                    // Notifications Panel
+                    // Notifications Section
                     <div className="section">
                         <h2>Notifications</h2>
                         <ul className="notifications-list">
