@@ -82,47 +82,66 @@ class RegisterView(generics.CreateAPIView):
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from datetime import timedelta
+from django.utils.timezone import now
+from django.db.models import Q
+
+# ... other imports like Issue model and IssueSerializer ...
+
 class RegistrarDashboardView(APIView):
     def get(self, request, *args, **kwargs):
-        issues = Issue.objects.all()
-
-        # Filter issues based on query parameters
-        course = request.query_params.get('course')
-        status = request.query_params.get('status')
-
-        if course:
-            issues = issues.filter(category=course)
-        if status and status.lower() != 'all':
-            issues = issues.filter(status=status)
-
-        # Dashboard analytics
-        total_issues = issues.count()
-        unresolved_issues = issues.filter(~Q(status='resolved')).count()
-
-        # Calculate average resolution time manually
-        resolved_issues = issues.filter(status='resolved')
+        # Get filter parameters
+        course_param = request.query_params.get('course')
+        status_param = request.query_params.get('status')
+        
+        # Base queryset: issues relevant to the registrar (could be all issues or filtered by permissions)
+        issues_qs = Issue.objects.all()
+        if course_param:
+            issues_qs = issues_qs.filter(course_id=course_param)
+        if status_param:
+            if status_param.lower() == 'unresolved':
+                # Filter for issues that are not resolved (unresolved issues)
+                issues_qs = issues_qs.filter(~Q(status='Resolved'))
+            else:
+                # Filter by the exact status
+                issues_qs = issues_qs.filter(status=status_param)
+        
+        # Calculate metrics on the filtered queryset
+        total_issues = issues_qs.count()
+        unresolved_issues = issues_qs.filter(~Q(status='Resolved')).count()
+        
+        # Average resolution time for resolved issues
+        resolved_issues = issues_qs.filter(status='Resolved')
         if resolved_issues.exists():
-            total_time = sum(
-                (issue.updated_at - issue.created_at).total_seconds()
-                for issue in resolved_issues
-            )
-            avg_resolution_time = total_time / resolved_issues.count()
-            avg_resolution_time = timedelta(seconds=avg_resolution_time)
+            total_res_seconds = 0
+            for issue in resolved_issues:
+                # assuming Issue has a 'resolved_at' DateTimeField
+                resolution_duration = issue.resolved_at - issue.created_at
+                total_res_seconds += resolution_duration.total_seconds()
+            avg_seconds = total_res_seconds / resolved_issues.count()
+            avg_resolution_time = timedelta(seconds=avg_seconds)
         else:
             avg_resolution_time = timedelta(0)
-
-        # Overdue issues (open for more than 7 days)
-        overdue_issues_count = issues.filter(
-            Q(status='open') & Q(created_at__lte=now() - timedelta(days=7))
-        ).count()
-
+        
+        # Overdue issues: unresolved and created before a certain cutoff (e.g., 7 days ago)
+        cutoff_date = now() - timedelta(days=7)
+        overdue_issues_count = issues_qs.filter(~Q(status='Resolved'), created_at__lt=cutoff_date).count()
+        
+        # Serialize the filtered issues list
+        serialized_issues = IssueSerializer(issues_qs, many=True).data
+        
+        # Prepare response data
         data = {
             "total_issues": total_issues,
             "unresolved_issues": unresolved_issues,
             "avg_resolution_time": str(avg_resolution_time),
             "overdue_issues_count": overdue_issues_count,
+            "issues": serialized_issues
         }
         return Response(data)
+
 
 
 class StudentDashboardView(APIView):
