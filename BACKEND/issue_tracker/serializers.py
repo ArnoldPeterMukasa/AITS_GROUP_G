@@ -126,3 +126,11 @@ class LoginSerializer(serializers.Serializer):
                 'department': user.department
             }
         }
+
+class VerifyEmailSerializer(serializers.Serializer):
+    code = serializers.IntegerField(required=True)
+    email = serializers.EmailField(required=True)
+
+
+class ResendVerificationCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
