@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './AcademicRegistrarDashboard.css'; // Include CSS file for styling
+import 'animate.css/animate.min.css'; // ✅ corrected import (no trailing slash)
+import './AcademicRegistrarDashboard.css';
 
 function AcademicRegistrarDashboard() {
     const [issues, setIssues] = useState([]);
@@ -17,16 +18,15 @@ function AcademicRegistrarDashboard() {
     const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
     const navigate = useNavigate();
 
-    // ✅ Fetch data from the backend API
+    // ✅ Fetch registrar dashboard data
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const token = localStorage.getItem('authToken'); // ✅ Correct token key
-
+                const token = localStorage.getItem('authToken');
                 const response = await fetch('http://127.0.0.1:8000/api/RegistrarDashboard/', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`, // ✅ Token used correctly
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
                 });
@@ -35,10 +35,10 @@ function AcademicRegistrarDashboard() {
                     const data = await response.json();
                     setIssues(data.issues || []);
                     setAnalytics({
-                        avgResolutionTime: data.avg_resolution_time,
-                        unresolvedIssues: data.unresolved_issues,
-                        totalIssues: data.total_issues,
-                        overdueIssuesCount: data.overdue_issues_count,
+                        avgResolutionTime: data.avg_resolution_time || 0,
+                        unresolvedIssues: data.unresolved_issues || 0,
+                        totalIssues: data.total_issues || 0,
+                        overdueIssuesCount: data.overdue_issues_count || 0,
                     });
                 } else {
                     console.error('Failed to fetch data from the backend.');
@@ -56,16 +56,16 @@ function AcademicRegistrarDashboard() {
         setFilters({ ...filters, [name]: value });
     };
 
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        navigate("/login");
+    };
+
     const filteredIssues = issues.filter(issue => {
         const statusMatch = filters.status === 'all' || issue.status === filters.status;
         const courseMatch = !filters.course || issue.course === filters.course;
         return statusMatch && courseMatch;
     });
-
-    const handleLogout = () => {
-        localStorage.removeItem("authToken"); // ✅ Match with what we retrieved
-        navigate("/login");
-    };
 
     return (
         <div className="dashboard-container">
@@ -81,7 +81,7 @@ function AcademicRegistrarDashboard() {
             </div>
 
             <div className="content">
-                <h1>Academic Registrar Dashboard</h1>
+                <h1 className="animate__animated animate__fadeInDown">Academic Registrar Dashboard</h1>
 
                 <div className="overview">
                     <div className="card">
@@ -117,6 +117,7 @@ function AcademicRegistrarDashboard() {
                             <option value="open">Open</option>
                             <option value="resolved">Resolved</option>
                             <option value="pending">Pending</option>
+                            <option value="assigned">Assigned</option>
                         </select>
                     </form>
                 </div>
@@ -132,13 +133,19 @@ function AcademicRegistrarDashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredIssues.map(issue => (
-                                <tr key={issue.id}>
-                                    <td>{issue.title}</td>
-                                    <td>{issue.status}</td>
-                                    <td>{issue.category}</td>
+                            {filteredIssues.length === 0 ? (
+                                <tr>
+                                    <td colSpan="3" style={{ textAlign: 'center' }}>No issues found</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredIssues.map(issue => (
+                                    <tr key={issue.id}>
+                                        <td>{issue.title}</td>
+                                        <td>{issue.status}</td>
+                                        <td>{issue.category}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
