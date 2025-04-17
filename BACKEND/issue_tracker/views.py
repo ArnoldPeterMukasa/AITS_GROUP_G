@@ -22,6 +22,43 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
+from .serializers import *
+from django.shortcuts import render,redirect
+from .models import *
+from rest_framework.response import Response
+from rest_framework import viewsets
+from rest_framework.decorators import APIView
+from django.db.models import Count
+from rest_framework.decorators import api_view,permission_classes
+from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from django.contrib.auth.models import Group
+from rest_framework_simplejwt.exceptions import TokenError
+from django.utils.encoding import force_str  # Importing force_str
+from django.core.mail import send_mail,EmailMessage
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import serializers
+from django.shortcuts import render, redirect
+from django.utils.http import urlsafe_base64_decode
+from .utils import send_issue_assignment_email
+from django.contrib import messages
+from django.utils.http import urlsafe_base64_decode
+from django.contrib import messages
+from django.contrib.auth.tokens import default_token_generator  # Make sure this is imported
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
+from django.shortcuts import render, redirect
+from django.utils.http import urlsafe_base64_decode
+from django.contrib import messages
+from .utils import *
 
 
 User = get_user_model()
@@ -436,3 +473,36 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'status': 'mark as read'})
+    
+@method_decorator(csrf_exempt, name='dispatch')
+class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        serializer = VerifyEmailSerializer(data=data)
+        if serializer.is_valid():
+            verification_code = serializer.validated_data.get('code')
+            user_email = serializer.validated_data.get('email')
+            
+            try:
+                user = CustomUser.objects.get(email=user_email)
+            except CustomUser.DoesNotExist:
+                return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+            try:
+                verification = VerificationCode.objects.get(user=user, code=verification_code)
+                
+                if verification.is_verification_code_expired():
+                    return Response({'error': 'Verification Code has expired..'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                verification.is_code_verified = True
+                verification.save()
+                
+                user.is_email_verified = True
+                user.save()
+                return Response({'Message': 'Email verified successfully...'}, status=status.HTTP_200_OK)
+                
+            except VerificationCode.DoesNotExist:
+                return Response({'error': 'Verification Code does not exist..'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
