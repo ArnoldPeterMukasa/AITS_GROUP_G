@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, RegistrarIssueListView, IssueListCreateView, IssueDetailView, NotificationViewSet,RegistrarDashboardView, AssignIssueView,lecturer_list
+from .views import RegisterView, LoginView, StudentDashboardView, LecturerDashboardView, RegistrarIssueListView, IssueListCreateView, IssueDetailView, NotificationViewSet,RegistrarDashboardView, AssignIssueView,lecturer_list, LecturerListView
 #UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register(r'notifications', NotificationViewSet, basename='notifications')
 
 urlpatterns = [
+    
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', LoginView.as_view(), name='login'),
     #path('logout/', LogoutView.as_view(), name='logout'),
@@ -22,6 +23,8 @@ urlpatterns = [
     path('RegistrarIssues/', RegistrarIssueListView.as_view(), name='registrar_issues'),
     path('issues/<int:pk>/assign/', AssignIssueView.as_view(), name='assign-issue'),
     path('lecturers/', lecturer_list, name='lecturer-list'),
+    path('lecturerlist/', LecturerListView.as_view(), name='lecturers'),
+
 
 
     path('', include(router.urls)),

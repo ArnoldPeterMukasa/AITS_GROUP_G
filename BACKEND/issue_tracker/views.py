@@ -261,6 +261,14 @@ class LecturerDashboardView(APIView):
         })
 
 
+class LecturerListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        lecturers = User.objects.filter(user_type='lecturer')
+        serializer = UserSerializer(lecturers, many=True)
+        return Response(serializer.data)
+
     
 #user login
 class LoginView(APIView):
@@ -289,6 +297,7 @@ class LoginView(APIView):
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
     
 #Logout user
 '''class LoginView(APIView):
