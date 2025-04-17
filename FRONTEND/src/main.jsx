@@ -24,6 +24,8 @@ import ManageIssues from './components/ManageIssues.jsx';
 import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx'
 import CreateIssueForm from './components/CreateIssueForm.jsx';
+import 'animate.css';
+
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
