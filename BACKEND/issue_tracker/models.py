@@ -78,7 +78,7 @@ class Notification(models.Model):
     def __str__(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
-class VerificationCode(models.Model):
+'''class VerificationCode(models.Model):
     user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -109,6 +109,6 @@ class VerificationCode(models.Model):
         return {'Message':'Email verification code resent successfully...'}
     
     def str(self):
-        return f'Verification for {self.user.username} --- {self.code}'
+        return f'Verification for {self.user.username} --- {self.code}'''
 
 
