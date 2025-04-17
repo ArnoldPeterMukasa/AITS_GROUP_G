@@ -1,7 +1,13 @@
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+from django.conf import settings
+from django.core.mail import send_mail
+from random import randint
+from django.utils import timezone
 
 # Custom User Model
 class User(AbstractUser):
@@ -71,5 +77,38 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
+
+class VerificationCode(models.Model):
+    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+    code = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_code_verified = models.BooleanField(default=False)
+    
+    def is_verification_code_expired(self):
+        expiration_time = self.created_at + timezone.timedelta(minutes=20)
+        return timezone.now() > expiration_time
+        
+    @classmethod
+    def resend_verification_code(cls,user):
+        try:
+            cls.objects.filter(user = user).delete()
+    
+            new_verification_code = randint(10000,99999)
+            verification = cls.objects.create(user = user,code= new_verification_code)
+        except Exception as e:
+            return {'Error':e}
+
+        try:
+            subject = 'Email verification Code Resend..'
+            message = f"Hello, your Verification code that has been resent is: {new_verification_code}"
+            receipient_email= user.email
+            send_mail(subject,message,settings.EMAIL_HOST_USER,[receipient_email],fail_silently=False)
+        except Exception as e:
+            return {'Error':e}
+        
+        return {'Message':'Email verification code resent successfully...'}
+    
+    def str(self):
+        return f'Verification for {self.user.username} --- {self.code}'
 
 
