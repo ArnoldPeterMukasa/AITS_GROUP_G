@@ -234,28 +234,18 @@ function AcademicRegistrarDashboard() {
   // Use mock data if no lecturers are fetched
   const displayLecturers = lecturers.length > 0 ? lecturers : mockLecturers
 
-  return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <h2>Dashboard</h2>
-        <ul>
-          <li>
-            <Link to="/AcademicRegistrarDashboard">Home</Link>
-          </li>
-          <li>
-            <Link to="/manageUsersPage">Manage Users</Link>
-          </li>
-          <li>
-            <Link to="/Notifications">Notifications ({notifications.length})</Link>
-          </li>
-          <li>
-            <Link to="/Settings">Settings</Link>
-          </li>
-          <li>
-            <button onClick={handleLogout}>Logout</button>
-          </li>
-        </ul>
-      </div>
+    return (
+        <div className="dashboard-container">
+            <div className="sidebar">
+                <h2>Dashboard</h2>
+                <ul>
+                    <li><Link to="/AcademicRegistrarDashboard">Home</Link></li>
+                    <li><Link to="/manageUsersPage">Manage Users</Link></li>
+                    <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
+                    <li><Link to="/Settings">Settings</Link></li>
+                    <li><button onClick={handleLogout}>Logout</button></li>
+                </ul>
+            </div>
 
       <div className="content">
         <h1 className="animate__animated animate__fadeInDown">Academic Registrar Dashboard</h1>

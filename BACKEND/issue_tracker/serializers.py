@@ -18,7 +18,7 @@ class IssueSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Issue
-        fields = ['id', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
+        fields = ['id','title', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
 
 # Comment Serializer
 class CommentSerializer(serializers.ModelSerializer):
@@ -126,3 +126,11 @@ class LoginSerializer(serializers.Serializer):
                 'department': user.department
             }
         }
+
+class VerifyEmailSerializer(serializers.Serializer):
+    code = serializers.IntegerField(required=True)
+    email = serializers.EmailField(required=True)
+
+
+class ResendVerificationCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
