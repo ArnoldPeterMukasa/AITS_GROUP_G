@@ -98,16 +98,22 @@ export const fetchLecturers = async () => {
 };
 
 // ✅ Assign issue to lecturer by username
-export const assignIssueToLecturer = async (issueId, lecturerUsername) => {
-    try {
-        const response = await api.patch(`/issues/${issueId}/assign/`, {
-            lecturer_username: lecturerUsername,
-        });
-        return response.data;
-    } catch (error) {
-        console.error("Error assigning issue:", error);
-        throw error;
+// api.js
+export const fetchAssignedIssues = async (token) => {
+    const response = await fetch('http://127.0.0.1:8000/api/lecturer/assigned-issues/', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+  
+    if (response.ok) {
+      return await response.json();
+    } else {
+      throw new Error('Failed to fetch assigned issues');
     }
-};
+  };
+  
 
 export default api;
