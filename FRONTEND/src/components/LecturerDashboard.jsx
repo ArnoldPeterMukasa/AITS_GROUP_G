@@ -126,7 +126,7 @@ function LecturerDashboard() {
         <h2>Lecturer Dashboard</h2>
         <ul>
           <li><Link to="/LecturerDashboard">Home</Link></li>
-          <li><Link to="/ManageLecturerIssue">Manage Issues</Link></li>
+          <li><Link to="/ManageIssues">Manage Issues</Link></li>
           <li><Link to="/ReportsPage">Reports</Link></li>
           <li><Link to="/CourseContent">Course Content</Link></li>
           <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
