@@ -1,11 +1,12 @@
 # Description: This file contains the views for the issue_tracker app.
+# Description: This file contains the views for the issue_tracker app.
 from rest_framework import generics, permissions,status,serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Issue, Notification
+from .models import Issue, Notification,AssignedIssues
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Q
@@ -474,7 +475,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.save()
         return Response({'status': 'mark as read'})
     
-@method_decorator(csrf_exempt, name='dispatch')
+'''@method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
 
@@ -506,3 +507,21 @@ class VerifyEmailView(APIView):
             except VerificationCode.DoesNotExist:
                 return Response({'error': 'Verification Code does not exist..'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+'''
+class AssignedIssuesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Get issues assigned to the logged-in lecturer
+        if request.user.user_type != 'lecturer':
+            return Response({'error': 'Only lecturers can access this view'}, status=403)
+
+        issues = Issue.objects.filter(assigned_to=request.user).order_by('-created_at')
+        serializer = IssueSerializer(issues, many=True)
+        return Response(serializer.data)
+    
+
+class ResolveIssueView(APIView):
+    def post(self, request):
+        # your logic here
+        return Response({"message": "Issue resolved"})
