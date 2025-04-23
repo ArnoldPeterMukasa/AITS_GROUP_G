@@ -27,6 +27,7 @@ urlpatterns = [
     path('issues/assigned/', AssignedIssuesView.as_view(), name='assigned-issues'),
     path('lecturers/', lecturer_list, name='lecturer-list'),
     path('student_registration',StudentRegistrationView.as_view(), name='student_registration'),
+   
 
 
     path('', include(router.urls)),
