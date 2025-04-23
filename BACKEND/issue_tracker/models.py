@@ -18,7 +18,9 @@ class User(AbstractUser):
     ]
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
     department = models.CharField(max_length=100, blank=True, null=True)
-
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, unique=True)  # Username field for user
+    # Email field for user
     # Role-specific fields
     registration_number = models.CharField(max_length=50, blank=True, null=True)  # For students
     course = models.CharField(max_length=100, blank=True, null=True)  # For students
@@ -79,7 +81,7 @@ class Notification(models.Model):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
 class VerificationCode(models.Model):
-    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
     code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_code_verified = models.BooleanField(default=False)
@@ -110,5 +112,6 @@ class VerificationCode(models.Model):
     
     def str(self):
         return f'Verification for {self.user.username} --- {self.code}'
+
 
 

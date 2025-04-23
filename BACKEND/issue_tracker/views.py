@@ -30,7 +30,7 @@ from django.shortcuts import render,redirect
 from .models import *
 from rest_framework.response import Response
 from rest_framework import viewsets
-from rest_framework.decorators import APIView
+from rest_framework.views import APIView
 from django.db.models import Count
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.permissions import IsAuthenticated,AllowAny
@@ -50,7 +50,7 @@ from django.contrib import messages
 from django.utils.http import urlsafe_base64_decode
 from django.contrib import messages
 from django.contrib.auth.tokens import default_token_generator  # Make sure this is imported
-from rest_framework.views import APIView
+
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -61,7 +61,8 @@ from django.contrib import messages
 from .utils import *
 
 
-User = get_user_model()
+user = get_user_model()
+
 
 class RequestPasswordResetView(APIView):
     def post(self, request):
@@ -464,7 +465,63 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'status': 'mark as read'})
-    
+
+
+
+class StudentRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # Disable authentication for this view
+    def post(self,request):
+        data = request.data 
+        serializer = StudentRegistrationSerializer(data=data)
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            password = validated_data.pop('password')
+            
+            
+            user = User(**validated_data)
+            user.set_password(password)
+            user.save()
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            verification_code = randint(10000,99999)
+            verification,created = VerificationCode.objects.get_or_create(
+                user = user,
+                defaults={"code": verification_code})
+            
+            verification.code = verification_code
+            #verification_code.created_at = timezone.now()
+            verification.save()
+            
+          
+            subject = 'Email Verification Code'
+            message = f"Hello, your Verification code is: {verification_code}"
+            recipient_email = data.get('email')
+
+            email = EmailMessage(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [recipient_email]
+            )
+
+            email.send(fail_silently=False)
+            
+
+            return Response({
+                "message": "User  Created Successfully",
+                'data': validated_data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": access_token
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
@@ -477,8 +534,8 @@ class VerifyEmailView(APIView):
             user_email = serializer.validated_data.get('email')
             
             try:
-                user = CustomUser.objects.get(email=user_email)
-            except CustomUser.DoesNotExist:
+                user = User.objects.get(email=user_email)
+            except User.DoesNotExist:
                 return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
             try:
@@ -497,3 +554,54 @@ class VerifyEmailView(APIView):
             except VerificationCode.DoesNotExist:
                 return Response({'error': 'Verification Code does not exist..'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self,request):
+        data = request.data 
+        serializer = UserRegistrationSerializer(data=data)
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            password = validated_data.pop('password')
+            validated_data.pop('password_confirmation')
+            
+            user = CustomUser(**validated_data)
+            user.set_password(password)
+            user.save()
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            verification_code = randint(10000,99999)
+            verification,created = VerificationCode.objects.get_or_create(
+                user = user,
+                defaults={"code": verification_code})
+            
+            verification.code = verification_code
+            #verification_code.created_at = timezone.now()
+            verification.save()
+            
+            subject = 'Email Verification Code'
+            message = f"Hello, your Verification code is: {verification_code}"
+            recipient_email = data.get('email')
+
+            email = EmailMessage(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [recipient_email]
+            )
+
+            email.send(fail_silently=False)
+            
+
+            return Response({
+                "message": "User  Created Successfully",
+                'data': validated_data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": access_token
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
