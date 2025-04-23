@@ -16,7 +16,8 @@ import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
 import VerificationCodePage from './components/VerificationCodePage.jsx';
 import ResetPasswordPage from './components/ResetPasswordPage.jsx';
 
-import LecturerDashboard from './components/LecturerDashboard.jsx';
+import LecturerDashboard from './components/lecturerdashboard.jsx';
+
 
 import Inbox from './components/Inbox.jsx'; 
 
@@ -24,6 +25,8 @@ import ManageIssues from './components/ManageIssues.jsx';
 import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx'
 import CreateIssueForm from './components/CreateIssueForm.jsx';
+import 'animate.css';
+
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
@@ -51,6 +54,7 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/Assignments" element={<Assignments/>}/>
         <Route path="/CourseContent" element={<CourseContent/>}/>
         <Route path="/CreateIssueForm" element={<CreateIssueForm/>}/>
+        
    
         
         

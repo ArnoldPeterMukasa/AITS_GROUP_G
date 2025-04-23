@@ -1,11 +1,12 @@
 # Description: This file contains the views for the issue_tracker app.
+# Description: This file contains the views for the issue_tracker app.
 from rest_framework import generics, permissions,status,serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Issue, Notification
+from .models import Issue, Notification,AssignedIssues
 from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
 from .permissions import IsStudent, IsLecturer, IsRegistrar
 from django.db.models import Q
@@ -299,6 +300,14 @@ class LecturerDashboardView(APIView):
         })
 
 
+class LecturerListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        lecturers = User.objects.filter(user_type='lecturer')
+        serializer = UserSerializer(lecturers, many=True)
+        return Response(serializer.data)
+
     
 #user login
 class LoginView(APIView):
@@ -327,6 +336,7 @@ class LoginView(APIView):
                 {"error": "An unexpected error occurred"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
     
 #Logout user
 '''class LoginView(APIView):

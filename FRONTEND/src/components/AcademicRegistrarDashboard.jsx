@@ -74,6 +74,7 @@ function AcademicRegistrarDashboard() {
                 <ul>
                     <li><Link to="/AcademicRegistrarDashboard">Home</Link></li>
                     <li><Link to="/manageUsersPage">Manage Users</Link></li>
+                    <li><Link to="/ManageIssues">Manage Issues</Link></li>
                     <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
                     <li><Link to="/Settings">Settings</Link></li>
                     <li><button onClick={handleLogout}>Logout</button></li>

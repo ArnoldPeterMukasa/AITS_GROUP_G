@@ -1,12 +1,16 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Comment, Notification
+from .models import Issue, Comment, Notification, AssignedIssues
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import *
 
 
 
 User = get_user_model()
+class AssignedIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssignedIssues
+        fields = ['id', 'issue_name', 'description', 'status', 'assigned_to', 'created_at']
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -20,7 +24,7 @@ class IssueSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Issue
-        fields = ['id', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
+        fields = ['id','title', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
 
 # Comment Serializer
 class CommentSerializer(serializers.ModelSerializer):

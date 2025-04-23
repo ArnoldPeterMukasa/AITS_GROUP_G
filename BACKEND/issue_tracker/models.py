@@ -81,7 +81,7 @@ class Notification(models.Model):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
 class VerificationCode(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
     code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_code_verified = models.BooleanField(default=False)
@@ -111,7 +111,24 @@ class VerificationCode(models.Model):
         return {'Message':'Email verification code resent successfully...'}
     
     def str(self):
-        return f'Verification for {self.user.username} --- {self.code}'
+        return f'Verification for {self.user.username} --- {self.code}'''
+class Lecturer(models.Model):
+    name = models.CharField(max_length=255)
+    
+    # Add other fields for lecturer details as necessary
+
+    def __str__(self):
+        return self.name
+
+class AssignedIssues(models.Model):
+    issue_name = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(max_length=20, default='assigned')  # For example, you could have different statuses
+    assigned_to = models.ForeignKey('Lecturer', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.issue_name
 
 
 
