@@ -1,3 +1,4 @@
+models.py
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -28,7 +29,7 @@ class User(AbstractUser):
     academic_title = models.CharField(max_length=100, blank=True, null=True)  # For Academic registrars
     program = models.CharField(max_length=100, blank=True, null=True)  
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.username} ({self.get_user_type_display()})"
 
 
@@ -54,7 +55,7 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.title} - {self.get_status_display()}"
 
 
@@ -65,7 +66,7 @@ class Comment(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"Comment by {self.commented_by.username} on {self.issue.title}"
 
 
@@ -77,11 +78,11 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
 class VerificationCode(models.Model):
-    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
     code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_code_verified = models.BooleanField(default=False)
@@ -117,7 +118,7 @@ class Lecturer(models.Model):
     
     # Add other fields for lecturer details as necessary
 
-    def __str__(self):
+    def _str_(self):
         return self.name
 
 class AssignedIssues(models.Model):
@@ -127,8 +128,5 @@ class AssignedIssues(models.Model):
     assigned_to = models.ForeignKey('Lecturer', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return self.issue_name
-
-
-
