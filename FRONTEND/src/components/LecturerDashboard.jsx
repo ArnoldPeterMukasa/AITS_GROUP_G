@@ -19,7 +19,7 @@ function LecturerDashboard() {
     const fetchAssignedIssues = async () => {
       setLoading(true)
       try {
-        const token = localStorage.getItem("authToken")
+        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
         console.log("TOKEN:", token); // Add this
         if (!token) {
           navigate("/login")
