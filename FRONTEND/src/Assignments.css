@@ -20,3 +20,10 @@ h1 {
     margin: 10px 0;
     font-size: 16px;
 }
+.upload-assignment button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
