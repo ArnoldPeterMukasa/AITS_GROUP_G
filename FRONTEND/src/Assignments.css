@@ -1,0 +1,9 @@
+/* Basic Styling */
+.assignments-container {
+    padding: 20px;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
