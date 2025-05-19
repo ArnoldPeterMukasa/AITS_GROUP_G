@@ -7,7 +7,6 @@ h1 {
     font-size: 2em;
     margin-bottom: 20px;
 }
-
 /* Upload Assignment Section */
 .upload-assignment {
     margin-bottom: 30px;
@@ -21,7 +20,6 @@ h1 {
     margin: 10px 0;
     font-size: 16px;
 }
-
 .upload-assignment button {
     padding: 10px 15px;
     background-color: #4CAF50;
@@ -29,7 +27,6 @@ h1 {
     border: none;
     cursor: pointer;
 }
-
 .upload-assignment button:hover {
     background-color: #45a049;
 }
@@ -114,3 +111,4 @@ h1 {
         font-size: 12px;
     }
 }
+
