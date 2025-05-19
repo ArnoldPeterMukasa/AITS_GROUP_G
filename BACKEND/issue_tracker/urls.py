@@ -25,7 +25,8 @@ urlpatterns = [
     path('RegistrarIssues/', RegistrarIssueListView.as_view(), name='registrar_issues'),
     path('issues/<int:pk>/assign/', AssignIssueView.as_view(), name='assign-issue'),
     path('issues/assigned/', AssignedIssuesView.as_view(), name='assigned-issues'),
-    path('lecturers/', lecturer_list, name='lecturer-list'),
+    #path('lecturers/', LecturerListView.as_view(), name='lecturer-list'),
+    path('lecturers/', get_lecturers, name='lecturer-list'),
     path('student_registration',StudentRegistrationView.as_view(), name='student_registration'),
    
 
