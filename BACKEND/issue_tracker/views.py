@@ -305,7 +305,8 @@ class LoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    
+
+
 #Logout user
 '''class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
