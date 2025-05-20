@@ -734,6 +734,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
 
 
+
 class StudentRegistrationView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []  # Disable authentication for this view
