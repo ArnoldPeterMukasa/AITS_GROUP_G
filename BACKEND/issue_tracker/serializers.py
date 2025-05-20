@@ -6,6 +6,7 @@ from .models import *
 
 
 
+
 User = get_user_model()
 class AssignedIssueSerializer(serializers.ModelSerializer):
     class Meta:
