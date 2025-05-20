@@ -180,7 +180,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
         # Check if username already exists
         # if username and User .objects.filter(username=username).exists():
-            # raise serializers.ValidationError('Username already exists')
+        # raise serializers.ValidationError('Username already exists')
         
 
         # Ensure staff_id_or_student_no is an integer
@@ -199,7 +199,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
         
         # if registration_number and User .objects.filter(registration_number=registration_number).exists():
-            # raise serializers.ValidationError('Student with this student number already exists')
+        # raise serializers.ValidationError('Student with this student number already exists')
 
         
         if '@' not in email or email.split('@')[1] != 'gmail.com':
