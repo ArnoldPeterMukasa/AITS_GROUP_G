@@ -53,6 +53,7 @@ This is an automated message. Please do not reply to this email.
 
 
 
+
 def send_issue_notification_email(issue):
     """
     Send a plain text email to the registrar when a student creates a new issue
