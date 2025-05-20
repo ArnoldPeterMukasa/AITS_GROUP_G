@@ -26,7 +26,7 @@ urlpatterns = [
     path('issues/<int:pk>/assign/', AssignIssueView.as_view(), name='assign-issue'),
     path('issues/assigned/', AssignedIssuesView.as_view(), name='assigned-issues'),
     #path('lecturers/', LecturerListView.as_view(), name='lecturer-list'),
-    path('lecturers/', get_lecturers, name='lecturer-list'),
+    path('lecturers/', get_lecturers, name='lecturer-list'), #for the lecturer list to be displayed
     path('student_registration',StudentRegistrationView.as_view(), name='student_registration'),
    
 
