@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import *  # * means you are importing all from the views.py file
+from .views import *  # * the asterisk means you are importing all from the views.py file
 #UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
