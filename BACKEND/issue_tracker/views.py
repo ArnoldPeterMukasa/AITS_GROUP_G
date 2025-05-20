@@ -277,7 +277,7 @@ def get_lecturers(request):
     return Response(serializer.data)
 
     
-#user login
+#user_login
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
