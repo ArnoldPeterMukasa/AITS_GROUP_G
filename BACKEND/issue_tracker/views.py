@@ -882,3 +882,7 @@ class AssignedIssuesView(APIView):
         assigned_issues = Issue.objects.filter(assigned_to=request.user)
         serializer = IssueSerializer(assigned_issues, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+        #commit
