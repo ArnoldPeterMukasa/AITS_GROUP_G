@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import *  # * the asterisk means you are importing all from the views.py file
+from .views import *  # * means u importing all from the views.py file
 #UnassignedIssuesView, AssignIssueView
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.routers import DefaultRouter
@@ -26,10 +26,9 @@ urlpatterns = [
     path('issues/<int:pk>/assign/', AssignIssueView.as_view(), name='assign-issue'),
     path('issues/assigned/', AssignedIssuesView.as_view(), name='assigned-issues'),
     #path('lecturers/', LecturerListView.as_view(), name='lecturer-list'),
-    path('lecturers/', get_lecturers, name='lecturer-list'), #for the lecturer list to be displayed
+    path('lecturers/', get_lecturers, name='lecturer-list'),
     path('student_registration',StudentRegistrationView.as_view(), name='student_registration'),
-   
-
+    path('issues/resolve/<int:issue_id>/', ResolveIssueView.as_view(), name='resolve-issue'),
 
     path('', include(router.urls)),
 ]

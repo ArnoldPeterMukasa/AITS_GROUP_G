@@ -21,7 +21,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.timezone import now
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from datetime import timedelta
+from datetime import datetime, timedelta
 from .models import Issue, Notification, AssignedIssues
 from .serializers import *
 from .permissions import IsStudent, IsLecturer, IsRegistrar
@@ -144,30 +144,105 @@ class RegistrarDashboardView(APIView):
 
 
 
+#class StudentDashboardView(APIView):
+#    authentication_classes = [JWTAuthentication]
+#    permission_classes = [IsStudent]
+#
+#    def get(self, request):
+#        try:
+#            student = request.user
+#
+#            # add reistration  number to student info
+#            student_info = {
+#                'name': f"{student.first_name} {student.last_name}",
+#                'email': student.email,
+#                'registration_number': student.registration_number,
+#                'course': student.course,
+#                #'program': getattr(student, 'program', 'N/A')
+#            }
+#            try:
+#                issues = Issue.objects.filter(reported_by=student)
+#
+#                #filter handling
+#                status_filter = request.query_params.get('status')
+#                category = request.query_params.get('category')
+#                date_range = request.query_params.get('date_range')
+#
+#                if status_filter and status_filter.lower() != 'all':
+#                    issues = issues.filter(status=status_filter)
+#                if category:
+#                    issues = issues.filter(category=category)
+#                if date_range:
+#                    # Add date range filtering logic if needed
+#                    pass
+#
+#                # Analytics
+#                analytics = {
+#                    'totalIssues': issues.count(),
+#                    'resolvedIssues': issues.filter(status='resolved').count(),
+#                    'pendingIssues': issues.filter(status='pending').count(),
+#                    'inProgressIssues': issues.filter(status='in_progress').count(),
+#                    'recentActivity': issues.filter(
+#                        updated_at__gte=datetime.now() - timedelta(days=7)
+#                    ).count()
+#                }
+#
+#                # Notifications
+#                notifications = Notification.objects.filter(user=student, is_read=False)
+#
+#                return Response({
+#                    'status': 'success',
+#                    'student': student_info,
+#                    'analytics': analytics,
+#                    'issues': IssueSerializer(issues, many=True).data,
+#                    'notifications': NotificationSerializer(notifications, many=True).data,
+#                    'filters': {
+#                        'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
+#                        'categories': ['missing_marks', 'appeal', 'correction', 'other'],
+#                        'dateRanges': ['today', 'week', 'month', 'all']
+#                    }
+#                }, status=status.HTTP_200_OK)
+#
+#            except Issue.DoesNotExist:
+#                return Response({
+#                    'status': 'error',
+#                    'message': 'No issues found for the student.'
+#                }, status=status.HTTP_404_NOT_FOUND)
+#            
+#        except Exception as e:
+#            return Response({
+#                'status': 'error',
+#                'message': f"An unexpected error occurred: {str(e)}"
+#            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 class StudentDashboardView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsStudent]
-
+    
     def get(self, request):
         try:
             student = request.user
-
-            # add reistration  number to student info
+            
+            # Create student info dictionary with the required fields
             student_info = {
                 'name': f"{student.first_name} {student.last_name}",
                 'email': student.email,
                 'registration_number': student.registration_number,
                 'course': student.course,
-                #'program': getattr(student, 'program', 'N/A')
+                # 'program': getattr(student, 'program', 'N/A')
             }
+            
+            # Debug print to check student info
+            print(f"Student info: {student_info}")
+            
             try:
                 issues = Issue.objects.filter(reported_by=student)
-
-                #filter handling
+                
+                # Filter handling
                 status_filter = request.query_params.get('status')
                 category = request.query_params.get('category')
                 date_range = request.query_params.get('date_range')
-
+                
                 if status_filter and status_filter.lower() != 'all':
                     issues = issues.filter(status=status_filter)
                 if category:
@@ -175,7 +250,7 @@ class StudentDashboardView(APIView):
                 if date_range:
                     # Add date range filtering logic if needed
                     pass
-
+                
                 # Analytics
                 analytics = {
                     'totalIssues': issues.count(),
@@ -186,10 +261,10 @@ class StudentDashboardView(APIView):
                         updated_at__gte=datetime.now() - timedelta(days=7)
                     ).count()
                 }
-
+                
                 # Notifications
                 notifications = Notification.objects.filter(user=student, is_read=False)
-
+                
                 return Response({
                     'status': 'success',
                     'student': student_info,
@@ -202,20 +277,33 @@ class StudentDashboardView(APIView):
                         'dateRanges': ['today', 'week', 'month', 'all']
                     }
                 }, status=status.HTTP_200_OK)
-
+            
             except Issue.DoesNotExist:
                 return Response({
-                    'status': 'error',
-                    'message': 'No issues found for the student.'
-                }, status=status.HTTP_404_NOT_FOUND)
-            
+                    'status': 'success',
+                    'student': student_info,
+                    'message': 'No issues found for the student.',
+                    'issues': [],
+                    'notifications': [],
+                    'analytics': {
+                        'totalIssues': 0,
+                        'resolvedIssues': 0,
+                        'pendingIssues': 0,
+                        'inProgressIssues': 0,
+                        'recentActivity': 0
+                    },
+                    'filters': {
+                        'statuses': ['open', 'in_progress', 'resolved', 'pending', 'all'],
+                        'categories': ['missing_marks', 'appeal', 'correction', 'other'],
+                        'dateRanges': ['today', 'week', 'month', 'all']
+                    }
+                }, status=status.HTTP_200_OK)
+                
         except Exception as e:
             return Response({
                 'status': 'error',
                 'message': f"An unexpected error occurred: {str(e)}"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
 
 class LecturerDashboardView(APIView):
     authentication_classes = [JWTAuthentication]  # Secure API with JWT
@@ -277,7 +365,7 @@ def get_lecturers(request):
     return Response(serializer.data)
 
     
-#user_login
+#user login
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -305,8 +393,7 @@ class LoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-
+    
 #Logout user
 '''class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -640,7 +727,7 @@ class IssueListCreateView(generics.ListCreateAPIView):
         System Administrator
         """
         
-        from_email = settings.DEFAULT_FROM_EMAIL
+        from_email = settings.EMAIL_HOST_USER
         recipient_list = [registrar.email]
         
         try:
@@ -651,6 +738,9 @@ class IssueListCreateView(generics.ListCreateAPIView):
                 recipient_list=recipient_list,
                 fail_silently=False
             )
+            print('____________________________________')
+            print(registrar.email)
+            print('____________________________________')
             return True
         except Exception as e:
             # Log the error but don't stop the process
@@ -732,7 +822,6 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'status': 'mark as read'})
-
 
 
 
@@ -882,3 +971,113 @@ class AssignedIssuesView(APIView):
         assigned_issues = Issue.objects.filter(assigned_to=request.user)
         serializer = IssueSerializer(assigned_issues, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ResolveIssueView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, issue_id):
+        try:
+            # Get the issue and check if it's assigned to the current user
+            issue = Issue.objects.get(id=issue_id, assigned_to=request.user)
+            
+            # Get data from request
+            status_update = request.data.get('status')
+            resolution_comment = request.data.get('resolution_comment', '')
+            
+            # Validate the status
+            if status_update not in [status for status, _ in Issue.STATUS_CHOICES]:
+                return Response({
+                    'status': 'error',
+                    'message': f"Invalid status. Choose from {[status for status, _ in Issue.STATUS_CHOICES]}"
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Update the issue
+            issue.status = status_update
+            
+            # If we want to store resolution comments, we could add a field to the Issue model
+            # issue.resolution_comment = resolution_comment  # Assuming this field exists
+            
+            issue.save()
+            
+            # Create notification for the student who reported the issue
+            Notification.objects.create(
+                user=issue.reported_by,
+                message=f"Your issue '{issue.title}' has been updated to {issue.get_status_display()}",
+                issue=issue
+            )
+            
+            # Send email notification to the student who reported the issue
+            self.send_status_update_email(issue, status_update, resolution_comment)
+            
+            # Return the updated issue
+            serializer = IssueSerializer(issue)
+            return Response({
+                'status': 'success',
+                'message': f"Issue status updated to {issue.get_status_display()}",
+                'issue': serializer.data
+            }, status=status.HTTP_200_OK)
+            
+        except Issue.DoesNotExist:
+            return Response({
+                'status': 'error',
+                'message': "Issue not found or you are not authorized to update it"
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'status': 'error',
+                'message': f"An unexpected error occurred: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def send_status_update_email(self, issue, new_status, resolution_comment):
+        """
+        Send an email notification to the student who reported the issue
+        when the status is updated by a lecturer.
+        """
+        try:
+            # Email subject
+            subject = f"Update on your issue: {issue.title}"
+            
+            # Email message
+            message = f"""
+            Dear {issue.reported_by.get_full_name() or issue.reported_by.username},
+            
+            Your issue "{issue.title}" has been updated to status: {issue.get_status_display()}.
+            
+            """
+            
+            # Add resolution comment if provided
+            if resolution_comment:
+                message += f"""
+                Comment from lecturer:
+                {resolution_comment}
+                
+                """
+            
+            message += f"""
+            You can check more details by logging into the system.
+            
+            Regards,
+            {issue.assigned_to.get_full_name() or issue.assigned_to.username}
+            """
+            
+            # Sender email (from settings)
+            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@example.com')
+            
+            # Recipient email
+            recipient_list = [issue.reported_by.email]
+            
+            # Send the email
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False,
+            )
+            
+            return True
+            
+        except Exception as e:
+            # Log the error but don't stop the status update process
+            print(f"Failed to send email notification: {str(e)}")
+            return False
