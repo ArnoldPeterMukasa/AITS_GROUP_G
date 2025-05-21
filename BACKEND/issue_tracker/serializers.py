@@ -15,7 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
 # Issue Serializer
 class IssueSerializer(serializers.ModelSerializer):
     reported_by = UserSerializer(read_only=True)  # Display user info
-    
+    #assigned_to = UserSerializer (read_only=True)  # Display user info
     class Meta:
         model = Issue
         fields = ['id','title', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
