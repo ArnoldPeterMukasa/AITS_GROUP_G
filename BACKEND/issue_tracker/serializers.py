@@ -1,10 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Issue, Comment, Notification
+from .models import Issue, Comment, Notification, AssignedIssues
 from rest_framework_simplejwt.tokens import RefreshToken
+from .models import *
+
+
+
 
 
 User = get_user_model()
+class AssignedIssueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AssignedIssues
+        fields = ['id', 'issue_name', 'description', 'status', 'assigned_to', 'created_at']
 
 # User Serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -134,3 +142,84 @@ class VerifyEmailSerializer(serializers.Serializer):
 
 class ResendVerificationCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+    
+class StudentRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User 
+        fields = ['id', 'first_name', 'last_name','program','password',
+                  'email','user_type','department','registration_number','username',
+                  'course']
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': True},  # Password is required and write-only
+            'email': {'required': True},  # Email is required
+            'username': {'required': True},  # Username is required
+            'first_name': {'required': True},  # First name is required
+            'last_name': {'required': True},  # Last name is required
+            'user_type':{'required':True},
+            'program':{'required':True},
+            'course':{'required':True},
+            'department':{'required':True},
+            'registration_number':{'required':True},
+        }
+        
+        
+  
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        user_type = data.get('user_type')
+        program= data.get('program')
+        registration_number = data.get("registration_number")
+        course = data.get("course")
+        department = data.get("department")
+        last_name = data.get("last_name")
+        first_name = data.get("first_name")
+        
+
+        # Check if username already exists
+        # if username and User .objects.filter(username=username).exists():
+        # raise serializers.ValidationError('Username already exists')
+        
+
+        # Ensure staff_id_or_student_no is an integer
+        if registration_number is not None:
+            try:
+                registration_number = int(registration_number)
+            except ValueError:
+                raise serializers.ValidationError('Invalid student number or staff id must be an integer')
+            
+        if user_type not in dict(User .USER_TYPES):
+            raise serializers.ValidationError("Invalid role selected")
+
+        if user_type != 'student':
+            raise serializers.ValidationError("Only students can register using this endpoint")
+            
+
+        
+        # if registration_number and User .objects.filter(registration_number=registration_number).exists():
+        # raise serializers.ValidationError('Student with this student number already exists')
+
+        
+        if '@' not in email or email.split('@')[1] != 'gmail.com':
+            raise serializers.ValidationError('Only Gmail accounts are allowed...')
+        
+        # Check if email already exists
+        # if email and User .objects.filter(email=email).exists():
+        #     raise serializers.ValidationError("Email already exists")
+        
+        if len(password) < 8:
+            raise serializers.ValidationError("Password must be at least 8 characters long")
+        
+
+        
+        return data
+
+    def create(self, validated_data):
+        # Remove password confirmation from validated data
+        # validated_data.pop('password_confirmation')
+        user = User (**validated_data)
+        user.set_password(validated_data['password'])  # Hash the password
+        user.save()
+        return user

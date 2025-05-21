@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-class IsStudent(permissions.BasePermission):
+class IsStudent(permissions.BasePermission): #student permission
     def has_permission(self,request,view):
         return request.user.is_authenticated and request.user.user_type == 'student'
 

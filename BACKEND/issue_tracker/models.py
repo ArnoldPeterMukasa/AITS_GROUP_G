@@ -1,3 +1,4 @@
+# working models.py
 # Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -18,7 +19,9 @@ class User(AbstractUser):
     ]
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
     department = models.CharField(max_length=100, blank=True, null=True)
-
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=150, unique=True)  # Username field for user
+    # Email field for user
     # Role-specific fields
     registration_number = models.CharField(max_length=50, blank=True, null=True)  # For students
     course = models.CharField(max_length=100, blank=True, null=True)  # For students
@@ -26,7 +29,7 @@ class User(AbstractUser):
     academic_title = models.CharField(max_length=100, blank=True, null=True)  # For Academic registrars
     program = models.CharField(max_length=100, blank=True, null=True)  
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.username} ({self.get_user_type_display()})"
 
 
@@ -52,7 +55,7 @@ class Issue(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.title} - {self.get_status_display()}"
 
 
@@ -63,7 +66,7 @@ class Comment(models.Model):
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"Comment by {self.commented_by.username} on {self.issue.title}"
 
 
@@ -75,11 +78,11 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"Notification for {self.user.username} - Read: {self.is_read}"
 
-'''class VerificationCode(models.Model):
-    user = models.OneToOneField(CustomUser,on_delete=models.CASCADE)
+class VerificationCode(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
     code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_code_verified = models.BooleanField(default=False)
@@ -110,5 +113,20 @@ class Notification(models.Model):
     
     def str(self):
         return f'Verification for {self.user.username} --- {self.code}'''
+class Lecturer(models.Model):
+    name = models.CharField(max_length=255)
+    
+    # Add other fields for lecturer details as necessary
 
+    def _str_(self):
+        return self.name
 
+class AssignedIssues(models.Model):
+    issue_name = models.CharField(max_length=255)
+    description = models.TextField()
+    status = models.CharField(max_length=20, default='assigned')  # For example, you could have different statuses
+    assigned_to = models.ForeignKey('Lecturer', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def _str_(self):
+        return self.issue_name

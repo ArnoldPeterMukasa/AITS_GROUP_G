@@ -1,67 +1,34 @@
-# Description: This file contains the views for the issue_tracker app.
-from rest_framework import generics, permissions,status,serializers, viewsets
-from rest_framework.decorators import action
+from rest_framework import generics, permissions, status, viewsets
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .models import Issue, Notification
-from .serializers import UserSerializer, RegisterSerializer, LoginSerializer, IssueSerializer, NotificationSerializer
-from .permissions import IsStudent, IsLecturer, IsRegistrar
-from django.db.models import Q
-from datetime import timedelta, datetime
-from django.core.mail import send_mail
-from django.contrib.auth import authenticate
-from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes
+from django.contrib.auth.models import Group
+from django.contrib import messages
+from django.conf import settings
+from django.core.mail import send_mail, EmailMessage
+from django.db.models import Q, Count
+from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.timezone import now
-from rest_framework import permissions
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.exceptions import PermissionDenied
-from .serializers import *
-from django.shortcuts import render,redirect
-from .models import *
-from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework.decorators import APIView
-from django.db.models import Count
-from rest_framework.decorators import api_view,permission_classes
-from rest_framework.permissions import IsAuthenticated,AllowAny
-from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
-from django.contrib.auth import authenticate
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
-from django.contrib.auth.models import Group
-from rest_framework_simplejwt.exceptions import TokenError
-from django.utils.encoding import force_str  # Importing force_str
-from django.core.mail import send_mail,EmailMessage
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import serializers
-from django.shortcuts import render, redirect
-from django.utils.http import urlsafe_base64_decode
-from .utils import send_issue_assignment_email
-from django.contrib import messages
-from django.utils.http import urlsafe_base64_decode
-from django.contrib import messages
-from django.contrib.auth.tokens import default_token_generator  # Make sure this is imported
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from datetime import timedelta
+from .models import Issue, Notification, AssignedIssues
+from .serializers import *
+from .permissions import IsStudent, IsLecturer, IsRegistrar
+from .utils import send_issue_assignment_email
 
-from django.shortcuts import render, redirect
-from django.utils.http import urlsafe_base64_decode
-from django.contrib import messages
-from .utils import *
+user = get_user_model()
 
-
-User = get_user_model()
 
 class RequestPasswordResetView(APIView):
     def post(self, request):
@@ -119,11 +86,7 @@ class RegisterView(generics.CreateAPIView):
             return Response({"message": "User registered successfully!"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from datetime import timedelta
-from django.utils.timezone import now
-from django.db.models import Q
+
 
 # ... other imports like Issue model and IssueSerializer ...
 
@@ -306,8 +269,15 @@ class LecturerListView(APIView):
         serializer = UserSerializer(lecturers, many=True)
         return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_lecturers(request):
+    lecturers = User.objects.filter(user_type = 'lecturer')
+    serializer = UserSerializer(lecturers,many = True)
+    return Response(serializer.data)
+
     
-#user login
+#user_login
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
 
@@ -335,7 +305,8 @@ class LoginView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    
+
+
 #Logout user
 '''class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -372,60 +343,348 @@ class RegistrarIssueListView(APIView):
         serialized = IssueSerializer(issues, many=True)
         return Response({'status': 'success', 'issues': serialized.data})
 
+#class AssignIssueView(APIView):
+#    permission_classes = [IsAuthenticated, IsRegistrar]
+#    
+#    def send_email_to_lecturer(self, lecturer, issue):
+#        """Send an email notification to the lecturer about the new issue."""
+#        subject = f"New Issue assigned: {issue.title}"
+#        message = f"""
+#        Hello {lecturer.get_full_name()},
+#        
+#        A new issue has been reported by {issue.reported_by.get_full_name()}.
+#        
+#        Issue Details:
+#        Title: {issue.title}
+#        Description: {issue.description}
+#        
+#        Please review this issue at your earliest convenience.
+#        
+#        Best regards,
+#        System Administrator
+#        """
+#        
+#        from_email = settings.DEFAULT_FROM_EMAIL
+#        recipient_list = [lecturer.email]
+#        
+#        try:
+#            send_mail(
+#                subject=subject,
+#                message=message,
+#                from_email=from_email,
+#                recipient_list=recipient_list,
+#                fail_silently=False
+#            )
+#            return True
+#        except Exception as e:
+#            # Log the error but don't stop the process
+#            print(f"Error sending email: {str(e)}")
+#            return False
+#    
+#    def patch(self, request, pk):
+#        
+#        lecturer_username = request.data.get('lecturer_username')
+#        lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+#        
+#        issue = get_object_or_404(Issue, pk=pk)
+#
+#        try:
+#            lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+#            issue.assigned_to = lecturer
+#            issue.status = 'assigned'
+#            self.send_email_to_lecturer(lecturer)
+#            issue.save()
+#            return Response({'message': 'Issue assigned successfully'}, status=200)
+#        except User.DoesNotExist:
+#            return Response({'error': 'Lecturer not found'}, status=400)    
+
 class AssignIssueView(APIView):
     permission_classes = [IsAuthenticated, IsRegistrar]
-
-    def patch(self, request, pk):
+    
+    def send_email_to_lecturer(self, lecturer, issue):
+        """Send an email notification to the lecturer about the new issue."""
+        subject = f"New Issue assigned: {issue.title}"
+        message = f"""
+        Hello {lecturer.get_full_name()},
         
-        lecturer_username = request.data.get('lecturer_username')
-        lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
-        issue = get_object_or_404(Issue, pk=pk)
-
+        A new issue has been reported by {issue.reported_by.get_full_name()}.
+        
+        Issue Details:
+        Title: {issue.title}
+        Description: {issue.description}
+        
+        Please review this issue at your earliest convenience.
+        
+        Best regards,
+        System Administrator
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [lecturer.email]
+        
         try:
-            lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
-            issue.assigned_to = lecturer
-            issue.status = 'assigned'
-            issue.save()
-            return Response({'message': 'Issue assigned successfully'}, status=200)
-        except User.DoesNotExist:
-            return Response({'error': 'Lecturer not found'}, status=400)    
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False
+            )
+            return True
+        except Exception as e:
+            # Log the error but don't stop the process
+            print(f"Error sending email to lecturer: {str(e)}")
+            return False
+    
+    def send_email_to_student(self, student, issue, lecturer):
+        """Send an email notification to the student who reported the issue."""
+        subject = f"Your Issue has been assigned: {issue.title}"
+        message = f"""
+        Hello {student.get_full_name()},
+        
+        Your reported issue has been assigned to {lecturer.get_full_name()}.
+        
+        Issue Details:
+        Title: {issue.title}
+        Description: {issue.description}
+        Status: Assigned
+        
+        You will receive updates as the issue progresses.
+        
+        Best regards,
+        System Administrator
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [student.email]
+        
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False
+            )
+            return True
+        except Exception as e:
+            # Log the error but don't stop the process
+            print(f"Error sending email to student: {str(e)}")
+            return False
+    
+    def patch(self, request, pk):
+        try:
+            lecturer_username = request.data.get('lecturer_username')
+            if not lecturer_username:
+                return Response({'error': 'Lecturer username is required'}, status=400)
+                
+            issue = get_object_or_404(Issue, pk=pk)
+            student = issue.reported_by
+            
+            try:
+                lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+                
+                # Update issue details
+                issue.assigned_to = lecturer
+                issue.status = 'assigned'
+                issue.save()
+                
+                # Send email notifications
+                lecturer_email_sent = self.send_email_to_lecturer(lecturer, issue)
+                student_email_sent = self.send_email_to_student(student, issue, lecturer)
+                
+                response_data = {
+                    'message': 'Issue assigned successfully',
+                    'lecturer_email_sent': lecturer_email_sent,
+                    'student_email_sent': student_email_sent
+                }
+                
+                return Response(response_data, status=200)
+            except User.DoesNotExist:
+                return Response({'error': 'Lecturer not found'}, status=404)
+                
+        except Exception as e:
+            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 
 
+#class AssignIssueView(APIView):
+#    permission_classes = [IsAuthenticated, IsRegistrar]
+#    
+#    def send_email_to_lecturer(self, lecturer, issue):
+#        """Send an email notification to the lecturer about the new issue."""
+#        subject = f"New Issue assigned: {issue.title}"
+#        message = f"""
+#        Hello {lecturer.get_full_name()},
+#        
+#        A new issue has been reported by {issue.reported_by.get_full_name()}.
+#        
+#        Issue Details:
+#        Title: {issue.title}
+#        Description: {issue.description}
+#        
+#        Please review this issue at your earliest convenience.
+#        
+#        Best regards,
+#        System Administrator
+#        """
+#        
+#        from_email = settings.DEFAULT_FROM_EMAIL
+#        recipient_list = [lecturer.email]
+#        
+#        try:
+#            send_mail(
+#                subject=subject,
+#                message=message,
+#                from_email=from_email,
+#                recipient_list=recipient_list,
+#                fail_silently=False
+#            )
+#            return True
+#        except Exception as e:
+#            # Log the error but don't stop the process
+#            print(f"Error sending email: {str(e)}")
+#            return False
+#    
+#    def patch(self, request, pk):
+#        try:
+#            lecturer_username = request.data.get('lecturer_username')
+#            if not lecturer_username:
+#                return Response({'error': 'Lecturer username is required'}, status=400)
+#                
+#            issue = get_object_or_404(Issue, pk=pk)
+#            
+#            try:
+#                lecturer = User.objects.get(username=lecturer_username, user_type='lecturer')
+#                
+#                # Update issue details
+#                issue.assigned_to = lecturer
+#                issue.status = 'assigned'
+#                issue.save()
+#                
+#                # Send email notification
+#                email_sent = self.send_email_to_lecturer(lecturer, issue)
+#                
+#                response_data = {
+#                    'message': 'Issue assigned successfully',
+#                    'email_sent': email_sent
+#                }
+#                
+#                return Response(response_data, status=200)
+#            except User.DoesNotExist:
+#                return Response({'error': 'Lecturer not found'}, status=404)
+#                
+#        except Exception as e:
+#            return Response({'error': f'An error occurred: {str(e)}'}, status=500)
 # Create and List Issues
+#class IssueListCreateView(generics.ListCreateAPIView):
+#    queryset = Issue.objects.all()
+#    serializer_class = IssueSerializer
+#    authntication_classes = [JWTAuthentication] 
+#    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
+#
+#    def get_queryset(self): # Only return issues created by the current student
+#        return Issue.objects.filter(reported_by=self.request.user)
+#
+#
+#    def perform_create(self, serializer):
+#        try:
+#            # Get the registrar who will be assigned to the issue
+#            registrar = User.objects.filter(user_type='registrar').first()
+#
+#            if not registrar:
+#                raise serializers.ValidationError("No registrar found to assign the issue.")
+#
+#                
+#            # Save the issue with the current student as reported_by
+#            issue = serializer.save(
+#                reported_by=self.request.user,
+#                assigned_to=registrar
+#            )
+#
+#            # Create a notification for the registrar
+#            Notification.objects.create(
+#                user=registrar,
+#                issue=issue,
+#                message=f"New issue reported by {self.request.user.get_full_name()} - {issue.title}"
+#            )
+#
+#        except Exception as e:
+#            raise serializers.ValidationError(f"Error creating issue: {str(e)}")
+#
+
+
 class IssueListCreateView(generics.ListCreateAPIView):
     queryset = Issue.objects.all()
     serializer_class = IssueSerializer
-    authntication_classes = [JWTAuthentication] 
-    permission_classes = [permissions.IsAuthenticated, IsStudent] # Only Students can access
-
-    def get_queryset(self): # Only return issues created by the current student
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated, IsStudent]  # Only Students can access
+    
+    def get_queryset(self):  # Only return issues created by the current student
         return Issue.objects.filter(reported_by=self.request.user)
-
-
+    
+    def send_email_to_registrar(self, registrar, issue):
+        """Send an email notification to the registrar about the new issue."""
+        subject = f"New Issue Reported: {issue.title}"
+        message = f"""
+        Hello {registrar.get_full_name()},
+        
+        A new issue has been reported by {issue.reported_by.get_full_name()}.
+        
+        Issue Details:
+        Title: {issue.title}
+        Description: {issue.description}
+        
+        Please review this issue at your earliest convenience.
+        
+        Best regards,
+        System Administrator
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [registrar.email]
+        
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False
+            )
+            return True
+        except Exception as e:
+            # Log the error but don't stop the process
+            print(f"Error sending email: {str(e)}")
+            return False
+    
     def perform_create(self, serializer):
         try:
             # Get the registrar who will be assigned to the issue
             registrar = User.objects.filter(user_type='registrar').first()
-
+            
             if not registrar:
                 raise serializers.ValidationError("No registrar found to assign the issue.")
-
-                
+            
             # Save the issue with the current student as reported_by
             issue = serializer.save(
                 reported_by=self.request.user,
                 assigned_to=registrar
             )
-
+            
             # Create a notification for the registrar
             Notification.objects.create(
                 user=registrar,
                 issue=issue,
                 message=f"New issue reported by {self.request.user.get_full_name()} - {issue.title}"
             )
-
+            
+            # Send email to the registrar
+            self.send_email_to_registrar(registrar, issue)
+            
         except Exception as e:
             raise serializers.ValidationError(f"Error creating issue: {str(e)}")
+
+
 
 
 # List all issues (for lecturers)
@@ -473,7 +732,64 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'status': 'mark as read'})
-    
+
+
+
+
+class StudentRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []  # Disable authentication for this view
+    def post(self,request):
+        data = request.data 
+        serializer = StudentRegistrationSerializer(data=data)
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            password = validated_data.pop('password')
+            
+            
+            user = User(**validated_data)
+            user.set_password(password)
+            user.save()
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            verification_code = randint(10000,99999)
+            verification,created = VerificationCode.objects.get_or_create(
+                user = user,
+                defaults={"code": verification_code})
+            
+            verification.code = verification_code
+            #verification_code.created_at = timezone.now()
+            verification.save()
+            
+          
+            subject = 'Email Verification Code'
+            message = f"Hello, your Verification code is: {verification_code}"
+            recipient_email = data.get('email')
+
+            email = EmailMessage(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [recipient_email]
+            )
+
+            email.send(fail_silently=False)
+            
+
+            return Response({
+                "message": "User  Created Successfully",
+                'data': validated_data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": access_token
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
 @method_decorator(csrf_exempt, name='dispatch')
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
@@ -486,8 +802,8 @@ class VerifyEmailView(APIView):
             user_email = serializer.validated_data.get('email')
             
             try:
-                user = CustomUser.objects.get(email=user_email)
-            except CustomUser.DoesNotExist:
+                user = User.objects.get(email=user_email)
+            except User.DoesNotExist:
                 return Response({'error': 'User with this email does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
             try:
@@ -506,3 +822,63 @@ class VerifyEmailView(APIView):
             except VerificationCode.DoesNotExist:
                 return Response({'error': 'Verification Code does not exist..'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self,request):
+        data = request.data 
+        serializer = UserRegistrationSerializer(data=data)
+        if serializer.is_valid():
+            validated_data = serializer.validated_data
+            password = validated_data.pop('password')
+            validated_data.pop('password_confirmation')
+            
+            user = User(**validated_data)
+            user.set_password(password)
+            user.save()
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+
+            verification_code = randint(10000,99999)
+            verification,created = VerificationCode.objects.get_or_create(
+                user = user,
+                defaults={"code": verification_code})
+            
+            verification.code = verification_code
+            #verification_code.created_at = timezone.now()
+            verification.save()
+            
+            subject = 'Email Verification Code'
+            message = f"Hello, your Verification code is: {verification_code}"
+            recipient_email = data.get('email')
+
+            email = EmailMessage(
+                subject,
+                message,
+                settings.EMAIL_HOST_USER,
+                [recipient_email]
+            )
+
+            email.send(fail_silently=False)
+            
+
+            return Response({
+                "message": "User  Created Successfully",
+                'data': validated_data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": access_token
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+class AssignedIssuesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # Assuming issues have a field like assigned_to that links to a User or Lecturer
+        assigned_issues = Issue.objects.filter(assigned_to=request.user)
+        serializer = IssueSerializer(assigned_issues, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
