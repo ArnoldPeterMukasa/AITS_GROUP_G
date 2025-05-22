@@ -71,7 +71,7 @@ function LecturerDashboard() {
     fetchAssignedIssues()
     const intervalId = setInterval(fetchAssignedIssues, 60000)
     return () => clearInterval(intervalId)
-  }, [])
+  }, [navigate])
 
   useEffect(() => {
     // Close dropdown when clicking outside
