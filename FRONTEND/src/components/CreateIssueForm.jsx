@@ -1,90 +1,118 @@
 import React, { useState } from "react";
 import { createIssue } from "./Api"; // Make sure path is correct
+import "./CreateIssueForm.css";
 
 function CreateIssueForm({ onIssueCreated }) {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
-    const [category, setCategory] = useState("missing_marks");
-    const [message, setMessage] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        category: 'missing_marks'
+    });
+
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setError('');
+        setSuccess('');
+        setIsSubmitting(true);
 
         try {
-            const issueData = {
-                title,
-                description,
-                category,
-            };
+            // Validate form
+            if (!formData.title.trim() || !formData.description.trim()) {
+                throw new Error('Please fill in all required fields');
+            }
 
-            const response = await createIssue(issueData);
+            // Submit issue
+            const response = await createIssue(formData);
+            
+            // Clear form
+            setFormData({
+                title: '',
+                description: '',
+                category: 'missing_marks'
+            });
 
-            // ✅ Adjust depending on your API structure
-            if (response && response.id) {
-                setMessage("Issue created successfully!");
-                setTitle("");
-                setDescription("");
-                setCategory("missing_marks");
-
-                // Optional: Update issues in parent
-                if (onIssueCreated) {
-                    onIssueCreated(response);
-                }
-
-                console.log("Issue created:", response);
-            } else {
-                setMessage("Failed to create issue. Please try again.");
+            // Show success message
+            setSuccess('Issue created successfully!');
+            
+            // Notify parent component
+            if (onIssueCreated) {
+                onIssueCreated(response);
             }
         } catch (error) {
-            console.error("Error creating issue:", error);
-        
-            if (error.response && error.response.data) {
-                console.error("Django says:", error.response.data);
-                setMessage(`Validation error: ${JSON.stringify(error.response.data)}`);
-            } else {
-                setMessage("Failed to create issue.");
-            }
-        }
-         finally {
-            setLoading(false);
+            setError(error.response?.data?.message || error.message || 'Failed to create issue');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <div>
             <h1>Create Issue</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Issue title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                />
+            {error && <div className="error-message">{error}</div>}
+            {success && <div className="success-message">{success}</div>}
 
-                <input
-                    type="text"
-                    placeholder="Enter issue description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                />
+            <form onSubmit={handleSubmit} className="create-issue-form">
+                <div className="form-group">
+                    <label htmlFor="title">Title*</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Enter issue title"
+                        required
+                    />
+                </div>
 
-                <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                    <option value="missing_marks">Missing Marks</option>
-                    <option value="appeal">Appeal</option>
-                    <option value="correction">Correction for Marks</option>
-                    <option value="other">Other</option>
-                </select>
+                <div className="form-group">
+                    <label htmlFor="category">Category*</label>
+                    <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        required
+                    >
+                        <option value="missing_marks">Missing Marks</option>
+                        <option value="appeal">Appeal</option>
+                        <option value="correction">Correction</option>
+                    </select>
+                </div>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Submitting..." : "Create Issue"}
+                <div className="form-group">
+                    <label htmlFor="description">Description*</label>
+                    <textarea
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        placeholder="Describe your issue in detail"
+                        required
+                        rows="4"
+                    />
+                </div>
+
+                <button 
+                    type="submit" 
+                    className="submit-button"
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? 'Creating...' : 'Create Issue'}
                 </button>
             </form>
-
-            {message && <p>{message}</p>}
         </div>
     );
 }

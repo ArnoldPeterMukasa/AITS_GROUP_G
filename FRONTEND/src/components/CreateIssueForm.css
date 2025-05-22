@@ -1,0 +1,81 @@
+.create-issue-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.submit-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+.submit-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.error-message {
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #ffebee;
+    color: #c62828;
+    border-radius: 4px;
+    border: 1px solid #ffcdd2;
+}
+
+.success-message {
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 4px;
+    border: 1px solid #c8e6c9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .create-issue-form {
+        max-width: 100%;
+        margin: 0 10px;
+    }
+} 
