@@ -11,7 +11,6 @@ import StudentDashboard from './components/StudentDashboard.jsx';
 import AcademicRegistrarDashboard from './components/AcademicRegistrarDashboard.jsx';
 import ManageUsersPage from './components/ManageUsersPage.jsx';
 import Settings from './components/Settings.jsx';
-import Notifications from './components/Notifications.jsx';
 import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
 import VerificationCodePage from './components/VerificationCodePage.jsx';
 import ResetPasswordPage from './components/ResetPasswordPage.jsx';
@@ -42,7 +41,6 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path = "/AcademicRegistrarDashboard/*" element={<AcademicRegistrarDashboard/>}/>
         <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
         <Route path="/Settings" element={<Settings />} />
-        <Route path="/Notifications" element={<Notifications />} />
 
         
         
@@ -54,7 +52,6 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/CourseContent" element={<CourseContent/>}/>
         <Route path="/CreateIssueForm" element={<CreateIssueForm/>}/>
         
-   
         
         
 
