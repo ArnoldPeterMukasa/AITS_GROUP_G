@@ -80,7 +80,7 @@ function Home() {
                 <div className="footer-container">
                     <div className="footer-info">
                         <p>© {new Date().getFullYear()} Academic Issue Tracking System Group G. All Rights Reserved.</p>
-                        <p>Contact us: support@academictrackingsystemgroupG.com</p>
+                        <p>Contact us: <a href="mailto:info.groupg.aits@gmail.com">info.groupg.aits@gmail.com</a></p>
                         <p>Follow us on social media for updates.</p>
                         <div className="social-icons">
                             <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a> |
