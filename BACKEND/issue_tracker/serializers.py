@@ -6,6 +6,8 @@ from .models import *
 
 
 
+
+
 User = get_user_model()
 class AssignedIssueSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
 # Issue Serializer
 class IssueSerializer(serializers.ModelSerializer):
     reported_by = UserSerializer(read_only=True)  # Display user info
-    
+    #assigned_to = UserSerializer (read_only=True)  # Display user info
     class Meta:
         model = Issue
         fields = ['id','title', 'description', 'category', 'status', 'reported_by', 'assigned_to', 'created_at', 'updated_at']
@@ -178,7 +180,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
         # Check if username already exists
         # if username and User .objects.filter(username=username).exists():
-            # raise serializers.ValidationError('Username already exists')
+        # raise serializers.ValidationError('Username already exists')
         
 
         # Ensure staff_id_or_student_no is an integer
@@ -197,7 +199,7 @@ class StudentRegistrationSerializer(serializers.ModelSerializer):
 
         
         # if registration_number and User .objects.filter(registration_number=registration_number).exists():
-            # raise serializers.ValidationError('Student with this student number already exists')
+        # raise serializers.ValidationError('Student with this student number already exists')
 
         
         if '@' not in email or email.split('@')[1] != 'gmail.com':

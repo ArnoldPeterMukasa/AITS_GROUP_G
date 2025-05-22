@@ -15,8 +15,7 @@ import Notifications from './components/Notifications.jsx';
 import ForgotPasswordPage from './components/ForgotPasswordPage.jsx';
 import VerificationCodePage from './components/VerificationCodePage.jsx';
 import ResetPasswordPage from './components/ResetPasswordPage.jsx';
-
-import LecturerDashboard from './components/lecturerdashboard.jsx';
+import LecturerDashboard from './components/LecturerDashboard.jsx';
 
 
 import Inbox from './components/Inbox.jsx'; 

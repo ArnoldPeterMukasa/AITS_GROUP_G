@@ -10,10 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+
+#imports
 from pathlib import Path
 from datetime import timedelta
 import environ
 import os
+
+
+from urllib.parse import urlparse
 
 # Initialize environ
 env = environ.Env()
@@ -114,17 +119,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend_site.wsgi.application'
 
+DATABASE_URL = "postgresql://neondb_owner:npg_eJQyCzY30wKt@ep-lively-credit-a4kbc6hg-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require"
+database_url = urlparse(DATABASE_URL)
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': database_url.path[1:],
+        'USER':database_url.username,
+        'PASSWORD':database_url.password,
+        'HOST':database_url.hostname,
+        'PORT':5432
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

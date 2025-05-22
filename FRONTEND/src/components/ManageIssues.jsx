@@ -37,7 +37,7 @@ function ManageIssues() {
     const fetchLecturers = async () => {
         try {
             const token = localStorage.getItem("authToken");
-            const response = await axios.get("http://127.0.0.1:8000/api/lecturerlist/", {
+            const response = await axios.get("http://127.0.0.1:8000/api/lecturers/", {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
