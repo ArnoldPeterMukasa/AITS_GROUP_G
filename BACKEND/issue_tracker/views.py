@@ -972,7 +972,7 @@ class AssignedIssuesView(APIView):
         serializer = IssueSerializer(assigned_issues, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-<<<<<<< HEAD
+
 class ResolveIssueView(APIView):
     permission_classes = [IsAuthenticated]
     
@@ -1082,8 +1082,4 @@ class ResolveIssueView(APIView):
             # Log the error but don't stop the status update process
             print(f"Failed to send email notification: {str(e)}")
             return False
-=======
 
-
-        
->>>>>>> origin/main
