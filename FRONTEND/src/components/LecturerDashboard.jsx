@@ -28,7 +28,6 @@ function LecturerDashboard() {
   ]
 
   useEffect(() => {
-<<<<<<< HEAD
     const fetchAssignedIssues = async () => {
       setLoading(true)
       try {
@@ -69,8 +68,6 @@ function LecturerDashboard() {
       }
     }
 
-=======
->>>>>>> c9d1c12864e24106d0ac1dc857ccc0c0fd75f43c
     fetchAssignedIssues()
     const intervalId = setInterval(fetchAssignedIssues, 60000)
     return () => clearInterval(intervalId)
@@ -216,54 +213,7 @@ function LecturerDashboard() {
     }
   }
 
-  const toggleStatusDropdown = (issueId) => {
-    // This function now explicitly toggles the dropdown
-    setShowStatusDropdown(currentValue => currentValue === issueId ? null : issueId)
-  }
 
-  const handleStatusChange = async (issueId, status) => {
-    try {
-      const token = localStorage.getItem("authToken")
-      console.log("Updating issue status:", issueId, "to", status)
-      
-      const response = await fetch(`http://127.0.0.1:8000/api/issues/resolve/${issueId}/`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          status: status,
-          resolution_comment: `Status changed to ${status} by lecturer`,
-        }),
-      })
-
-      console.log("Update Status API Response Status:", response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log("Update Status API Response Data:", data)
-        
-        // Update the state with the updated issue
-        const updatedIssue = data.issue || data
-        setIssues(issues.map(issue => 
-          issue.id === issueId ? updatedIssue : issue
-        ))
-        
-        alert(`Issue status has been updated to ${status} successfully!`)
-        setShowStatusDropdown(null)
-        
-        // Refresh the issues list to ensure data is up-to-date
-        fetchAssignedIssues()
-      } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        alert(`Failed to update the issue: ${errorData.message || response.statusText}`)
-      }
-    } catch (error) {
-      console.error("Error updating issue status:", error)
-      alert(`An error occurred while updating the issue: ${error.message}`)
-    }
-  }
 
   return (
     <div className="dashboard-container">
