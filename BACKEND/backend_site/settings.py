@@ -47,7 +47,7 @@ AUTH_USER_MODEL = 'issue_tracker.User'
 SECRET_KEY = 'django-insecure-+^#xq=+bi7y$n8(@%sa_1hp(8&%tce#0xo4o4av9rpubc1j0+p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
