@@ -23,7 +23,6 @@ import ManageIssues from './components/ManageIssues.jsx';
 import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx'
 import CreateIssueForm from './components/CreateIssueForm.jsx';
-import 'animate.css';
 
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
@@ -37,7 +36,10 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/register" element={<Register/>} />
         <Route path="/app" element={<App/>} />
-        <Route path="/StudentDashboard" element={<StudentDashboard/>}/>
+        <Route path="/StudentDashboard" element={<StudentDashboard />} />
+        {/* <Route path="/Home" element={<Home />} /> */}
+        
+        
         <Route path = "/AcademicRegistrarDashboard/*" element={<AcademicRegistrarDashboard/>}/>
         <Route path="/ManageUsersPage" element={<ManageUsersPage />} />
         <Route path="/Settings" element={<Settings />} />
