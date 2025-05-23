@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import "./LecturerDashboard.css" // Include CSS file for styling
+import "./LecturerDashboard.css"
 
 function LecturerDashboard() {
   const [issues, setIssues] = useState([])
@@ -20,84 +20,22 @@ function LecturerDashboard() {
   const [showStatusDropdown, setShowStatusDropdown] = useState(null)
   const navigate = useNavigate()
 
-  // Status options from the model
   const STATUS_CHOICES = [
     { value: 'open', label: 'Open' },
     { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' },
   ]
 
-  useEffect(() => {
-    const fetchAssignedIssues = async () => {
-      setLoading(true)
-      try {
-        const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
-        console.log("TOKEN:", token); // Add this
-        if (!token) {
-          navigate("/login")
-          return
-        }
-
-        const response = await fetch("http://127.0.0.1:8000/api/issues/assigned/", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setIssues(data || [])
-
-          if (data && data.length > 0) {
-            const newIssues = data.filter((issue) => issue.status === "assigned")
-            if (newIssues.length > 0) {
-              setNotifications((prev) => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
-            }
-          }
-        } else {
-          console.error("Failed to fetch assigned issues")
-          setError("Failed to load assigned issues. Please try again later.")
-        }
-      } catch (error) {
-        console.error("Error fetching assigned issues:", error)
-        setError("An error occurred while loading your assigned issues.")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAssignedIssues()
-    const intervalId = setInterval(fetchAssignedIssues, 60000)
-    return () => clearInterval(intervalId)
-  }, [navigate])
-
-  useEffect(() => {
-    // Close dropdown when clicking outside
-    const handleClickOutside = (event) => {
-      if (showStatusDropdown && !event.target.closest('.status-dropdown-container')) {
-        setShowStatusDropdown(null)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showStatusDropdown])
-
   const fetchAssignedIssues = async () => {
     setLoading(true)
     try {
-      const token = localStorage.getItem("authToken")
-      console.log("TOKEN:", token)
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
       if (!token) {
         navigate("/login")
         return
       }
 
-      const response = await fetch("http://127.0.0.1:8000/api/issues/assigned/", {
+      const response = await fetch("https://aits-group-g-backend.onrender.com/api/issues/assigned/", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -105,45 +43,45 @@ function LecturerDashboard() {
         },
       })
 
-      console.log("API Response Status:", response.status)
-      
       if (response.ok) {
         const data = await response.json()
-        console.log("API Response Data:", data)
-        
-        // Handle both response formats - array or object with issues property
-        let issuesData = []
-        if (data.issues) {
-          issuesData = data.issues
-        } else if (Array.isArray(data)) {
-          issuesData = data
-        } else if (typeof data === 'object' && data !== null) {
-          console.log("Unexpected data format:", data)
-          issuesData = data.data || []
-        }
-        
-        console.log("Processed Issues:", issuesData)
+        const issuesData = Array.isArray(data)
+          ? data
+          : data.issues || data.data || []
+
         setIssues(issuesData)
-        
-        // Update notifications for new issues
-        if (issuesData.length > 0) {
-          const newIssues = issuesData.filter(issue => issue.status === "open")
-          if (newIssues.length > 0) {
-            setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
-          }
+
+        const newIssues = issuesData.filter(issue => issue.status === "open")
+        if (newIssues.length > 0) {
+          setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
         }
       } else {
         const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        console.error("Failed to fetch assigned issues:", errorData)
         setError(`Failed to load assigned issues: ${errorData.message || response.statusText}`)
       }
     } catch (error) {
-      console.error("Error fetching assigned issues:", error)
       setError(`An error occurred while loading your assigned issues: ${error.message}`)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchAssignedIssues()
+    const intervalId = setInterval(fetchAssignedIssues, 60000)
+    return () => clearInterval(intervalId)
+  }, [navigate])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showStatusDropdown && !event.target.closest('.status-dropdown-container')) {
+        setShowStatusDropdown(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showStatusDropdown])
 
   const handleLogout = () => {
     localStorage.removeItem("authToken")
@@ -163,16 +101,14 @@ function LecturerDashboard() {
   }
 
   const handleResolveIssue = async () => {
-    if (!selectedIssue || !selectedIssue.id) {
+    if (!selectedIssue?.id) {
       alert("No issue selected")
       return
     }
-    
+
     try {
       const token = localStorage.getItem("authToken")
-      console.log("Updating issue:", selectedIssue.id, "with status:", selectedStatus)
-      
-      const response = await fetch(`http://127.0.0.1:8000/api/issues/resolve/${selectedIssue.id}/`, {
+      const response = await fetch(`https://aits-group-g-backend.onrender.com/api/issues/assigned/`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -184,36 +120,25 @@ function LecturerDashboard() {
         }),
       })
 
-      console.log("Update API Response Status:", response.status)
-      
       if (response.ok) {
         const data = await response.json()
-        console.log("Update API Response Data:", data)
-        
-        // Determine what data structure we're receiving
         const updatedIssue = data.issue || data
-        
-        // Update the state with the updated issue
-        setIssues(issues.map(issue => 
-          issue.id === selectedIssue.id ? updatedIssue : issue
-        ))
-        
+
+        setIssues(prevIssues =>
+          prevIssues.map(issue => (issue.id === selectedIssue.id ? updatedIssue : issue))
+        )
+
         alert(`Issue status has been updated to ${selectedStatus} successfully!`)
         closeResolveModal()
-        
-        // Refresh the issues list to ensure data is up-to-date
         fetchAssignedIssues()
       } else {
         const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
         alert(`Failed to update the issue: ${errorData.message || response.statusText}`)
       }
     } catch (error) {
-      console.error("Error updating issue:", error)
       alert(`An error occurred while updating the issue: ${error.message}`)
     }
   }
-
-
 
   return (
     <div className="dashboard-container">
@@ -232,11 +157,9 @@ function LecturerDashboard() {
 
       <div className="content">
         <h1>Welcome to the Lecturer Dashboard</h1>
-        
+
         <div className="actions-bar">
-          <button className="refresh-btn" onClick={fetchAssignedIssues}>
-            Refresh Issues
-          </button>
+          <button className="refresh-btn" onClick={fetchAssignedIssues}>Refresh Issues</button>
         </div>
 
         <div className="overview">
@@ -283,9 +206,7 @@ function LecturerDashboard() {
                       <td className="title-cell">{issue.title}</td>
                       <td>
                         <span className={`status-badge status-${issue.status}`}>
-                          {issue.status === "open" ? "Open" : 
-                           issue.status === "in_progress" ? "In Progress" : 
-                           issue.status === "resolved" ? "Resolved" : issue.status}
+                          {STATUS_CHOICES.find(s => s.value === issue.status)?.label || issue.status}
                         </span>
                       </td>
                       <td>{issue.category}</td>
@@ -294,12 +215,7 @@ function LecturerDashboard() {
                       <td>
                         {issue.status !== "resolved" && (
                           <div className="action-buttons">
-                            <button 
-                              className="detail-btn" 
-                              onClick={() => openResolveModal(issue)}
-                            >
-                              Update Status
-                            </button>
+                            <button className="detail-btn" onClick={() => openResolveModal(issue)}>Update Status</button>
                           </div>
                         )}
                       </td>
@@ -334,14 +250,13 @@ function LecturerDashboard() {
         </div>
       </div>
 
-      {/* Resolution Modal - For detailed resolutions with comments */}
       {isResolveModalOpen && selectedIssue && (
-        <div className="modal-overlay">
+        <div className="modal-overlay" role="dialog" aria-modal="true">
           <div className="modal-content">
             <h2>Update Issue Status</h2>
             <p><strong>Title:</strong> {selectedIssue.title}</p>
             <p><strong>Description:</strong> {selectedIssue.description}</p>
-            
+
             <div className="form-group">
               <label htmlFor="status-select">Status:</label>
               <select
@@ -357,7 +272,7 @@ function LecturerDashboard() {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label htmlFor="resolution-comment">Resolution Comment:</label>
               <textarea
@@ -369,14 +284,10 @@ function LecturerDashboard() {
                 className="resolution-textarea"
               />
             </div>
-            
+
             <div className="modal-actions">
-              <button className="cancel-btn" onClick={closeResolveModal}>
-                Cancel
-              </button>
-              <button className="resolve-btn" onClick={handleResolveIssue}>
-                Update Status
-              </button>
+              <button className="cancel-btn" onClick={closeResolveModal}>Cancel</button>
+              <button className="resolve-btn" onClick={handleResolveIssue}>Update Status</button>
             </div>
           </div>
         </div>
