@@ -32,7 +32,7 @@ function LecturerDashboard() {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
       if (!token) {
         navigate("/login")
-        return
+        return           
       }
 
       const response = await fetch("https://aits-group-g-backend.onrender.com/api/issues/assigned/", {
