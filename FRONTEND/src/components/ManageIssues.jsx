@@ -12,7 +12,7 @@ function ManageIssues() {
     });
     const [search, setSearch] = useState('');
 
-    // Fetch issues function (moved outside useEffect so it can be reused)
+    // Fetch issues function (moved outside useEffect so it can be reused)    
     const fetchIssues = async () => {
         try {
             const token = localStorage.getItem("authToken");

@@ -23,7 +23,7 @@ function AcademicRegistrarDashboard() {
         const fetchData = async () => {
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch('http://127.0.0.1:8000/api/RegistrarDashboard/', {
+                const response = await fetch('https://aits-group-g-backend.onrender.com/api/RegistrarDashboard/', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,

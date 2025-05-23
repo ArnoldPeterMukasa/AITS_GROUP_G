@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./LoginPage.css"
+import { BASE_API_URL } from "../config";
+
 
 function LoginPage() {
   const [username, setUsername] = useState("")
@@ -26,14 +28,15 @@ function LoginPage() {
 
     try {
       // Send login data to the backend
-      const response = await fetch("http://127.0.0.1:8000/api/login/", {
+      const response = await fetch(`${BASE_API_URL}/login/`, {
+
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           username: username,
-          password: password,
+          password: password,        
         }),
       })
 

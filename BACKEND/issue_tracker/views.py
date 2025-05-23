@@ -977,7 +977,9 @@ class ResolveIssueView(APIView):
     permission_classes = [IsAuthenticated]
     
     def put(self, request, issue_id):
+
         try:
+            issue_id = int(issue_id)
             # Get the issue and check if it's assigned to the current user
             issue = Issue.objects.get(id=issue_id, assigned_to=request.user)
             
