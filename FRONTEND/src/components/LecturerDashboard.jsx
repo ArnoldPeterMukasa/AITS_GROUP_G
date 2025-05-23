@@ -108,7 +108,7 @@ function LecturerDashboard() {
 
     try {
       const token = localStorage.getItem("authToken")
-      const response = await fetch(`https://aits-group-g-backend.onrender.com/api/issues/assigned/`, {
+      const response = await fetch(`https://aits-group-g-backend.onrender.com/api/issues/resolve/${selectedIssue.id}/`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
