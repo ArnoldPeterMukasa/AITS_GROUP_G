@@ -1,105 +1,147 @@
+/* StudentDashboard.css */
 .dashboard-container {
     min-height: 100vh;
     background-color: #f5f6fa;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.dashboard-header {
-    background-color: #ffffff;
-    padding: 1rem 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Sidebar Styles */
+.sidebar {
+    background-color: #2c3e50;
+    color: white;
+    padding: 2rem 1rem;
+    height: 100vh;
     position: sticky;
     top: 0;
-    z-index: 1000;
 }
 
-.header-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s;
-    background-color: #007bff;
+.sidebar h2 {
     color: white;
-}
-
-.button:hover {
-    background-color: #0056b3;
-}
-
-.logout-button {
-    background-color: #dc3545;
-}
-
-.logout-button:hover {
-    background-color: #c82333;
-}
-
-.content {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.section {
-    background-color: #ffffff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.profile-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-
-.profile-section p {
-    margin: 0.5rem 0;
-}
-
-.issues-list {
+.sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.issue-item {
-    border: 1px solid #e1e1e1;
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    background-color: #fff;
-}
-
-.issue-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.sidebar li {
     margin-bottom: 0.5rem;
 }
 
-.issue-category {
-    background-color: #e9ecef;
-    padding: 0.25rem 0.5rem;
+.sidebar button {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    color: white;
+    text-align: left;
     border-radius: 4px;
-    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.95rem;
 }
 
-.issue-status {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    font-weight: 500;
+.sidebar button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content Styles */
+.content {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Welcome Section */
+#welcome-section {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Card Layout */
+.overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 1.25rem;
+}
+
+/* Profile Info */
+.profile-info p {
+    margin: 0.75rem 0;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #f1f3f5;
+}
+
+.profile-info p:last-child {
+    border-bottom: none;
+}
+
+/* Issues Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    text-align: left;
+    color: #495057;
+    font-weight: 600;
+    border-bottom: 2px solid #e9ecef;
+}
+
+td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+tr:hover td {
+    background-color: #f8f9fa;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
 }
 
 .status-open {
@@ -117,62 +159,79 @@
     color: #155724;
 }
 
-.issue-description {
-    margin: 0.5rem 0;
-    color: #666;
-}
-
-.issue-date {
-    font-size: 0.875rem;
-    color: #6c757d;
-}
-
+/* Notifications */
 .notifications-list {
     list-style: none;
     padding: 0;
 }
 
-.notification-item {
-    padding: 1rem;
-    border-bottom: 1px solid #e1e1e1;
-    background-color: #fff;
+.notifications-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f3f5;
+    display: flex;
+    align-items: center;
 }
 
-.notification-item:last-child {
+.notifications-list li:before {
+    content: "•";
+    color: #007bff;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+.notifications-list li:last-child {
     border-bottom: none;
+}
+
+/* Buttons */
+.button {
+    padding: 0.6rem 1.2rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.button:hover {
+    background-color: #0056b3;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        height: auto;
+        position: relative;
         padding: 1rem;
     }
 
-    .header-actions {
-        margin-top: 1rem;
-        width: 100%;
-        justify-content: space-between;
+    .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .sidebar li {
+        margin-bottom: 0;
+    }
+
+    .sidebar button {
+        padding: 0.5rem;
     }
 
     .content {
-        padding: 1rem;
+        padding: 1.5rem;
     }
 
-    .profile-section {
+    .overview {
         grid-template-columns: 1fr;
     }
-}
-
-/* Loading States */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-}
-
-.loading::after {
-    content: "Loading...";
-    color: #6c757d;
 }
