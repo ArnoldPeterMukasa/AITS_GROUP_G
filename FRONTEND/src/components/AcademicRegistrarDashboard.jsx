@@ -15,7 +15,7 @@ function AcademicRegistrarDashboard() {
         course: '',
         status: 'all',
     });
-    const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
+    // const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
     const navigate = useNavigate();
 
     // ✅ Fetch registrar dashboard data
@@ -75,7 +75,7 @@ function AcademicRegistrarDashboard() {
                     <li><Link to="/AcademicRegistrarDashboard">Home</Link></li>
                     <li><Link to="/manageUsersPage">Manage Users</Link></li>
                     <li><Link to="/ManageIssues">Manage Issues</Link></li>
-                    <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
+                    {/* <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li> */}
                     <li><Link to="/Settings">Settings</Link></li>
                     <li><button onClick={handleLogout}>Logout</button></li>
                 </ul>
