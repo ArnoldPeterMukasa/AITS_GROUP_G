@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // ✅ Base URL for your Django API
-const BASE_URL = "http://127.0.0.1:8000/api";
+const BASE_URL = "https://aits-group-g-backend.onrender.com/api";
 
 // Axios instance
 const api = axios.create({
@@ -100,7 +100,7 @@ export const fetchLecturers = async () => {
 // ✅ Assign issue to lecturer by username
 // api.js
 export const fetchAssignedIssues = async (token) => {
-    const response = await fetch('http://127.0.0.1:8000/api/lecturer/assigned-issues/', {
+    const response = await fetch('https://aits-group-g-backend.onrender.com/api/lecturer/assigned-issues/', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
