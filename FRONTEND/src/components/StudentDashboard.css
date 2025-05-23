@@ -1,297 +1,57 @@
-:root {
-    --primary: #4361ee;
-    --primary-hover: #3a56d4;
-    --secondary: #f72585;
-    --light: #f8f9fa;
-    --dark: #212529;
-    --gray: #6c757d;
-    --border: #e9ecef;
-    --success: #4cc9f0;
-    --warning: #f8961e;
-    --danger: #ef233c;
-    --danger-hover: #d51f36;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --radius-sm: 4px;
-    --radius-md: 8px;
-    --radius-lg: 12px;
-}
-
-.dashboard-container {
-    min-height: 100vh;
-    background-color: #f8fafc;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: var(--dark);
-    line-height: 1.6;
-}
-
 .dashboard-header {
-    background-color: #ffffff;
-    padding: 1rem 2.5rem;
-    box-shadow: var(--shadow-md);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ddd;
 }
 
-.dashboard-header h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--primary);
-    margin: 0;
+.header-actions .button {
+    margin-left: 10px;
 }
 
-.header-actions {
-    display: flex;
-    gap: 1rem;
-}
-
-.button {
-    padding: 0.65rem 1.25rem;
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    background-color: var(--primary);
-    color: white;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.button:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
-}
-
-.button:active {
-    transform: translateY(0);
-}
-
-.logout-button {
-    background-color: var(--danger);
-}
-
-.logout-button:hover {
-    background-color: var(--danger-hover);
-}
-
-.content {
-    padding: 2.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.section {
-    background-color: #ffffff;
+.dashboard-main {
     padding: 2rem;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 2rem;
-    border: 1px solid var(--border);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.section:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.section h2 {
-    color: var(--dark);
-    margin-top: 0;
+.welcome-heading {
     margin-bottom: 1.5rem;
-    font-size: 1.3rem;
-    font-weight: 600;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--border);
 }
 
-.profile-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+.dashboard-grid {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.dashboard-column {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
 }
 
-.profile-section p {
-    margin: 0.75rem 0;
-    padding: 0.75rem;
-    background-color: var(--light);
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--primary);
-}
-
-.profile-section strong {
-    color: var(--dark);
-    font-weight: 600;
-}
-
-#welcome-section {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 1.5rem;
-    background: linear-gradient(90deg, var(--primary), var(--secondary));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.issues-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 1rem;
-}
-
-.issue-item {
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1.5rem;
+.card {
     background-color: #fff;
-    transition: all 0.2s ease;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.issue-item:hover {
-    border-color: var(--primary);
-    box-shadow: var(--shadow-sm);
+.issue-item,
+.notification-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
 }
 
 .issue-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.issue-category {
-    background-color: var(--light);
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
+    font-weight: bold;
 }
 
 .issue-status {
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    text-transform: capitalize;
 }
-
-.status-open {
-    background-color: #e3f2fd;
-    color: #1976d2;
-}
-
-.status-in_progress {
-    background-color: #fff8e1;
-    color: #ff8f00;
-}
-
-.status-resolved {
-    background-color: #e8f5e9;
-    color: #388e3c;
-}
-
-.issue-description {
-    margin: 1rem 0;
-    color: var(--gray);
-    line-height: 1.6;
-}
-
-.issue-date {
-    font-size: 0.85rem;
-    color: var(--gray);
-    font-style: italic;
-}
-
-.notifications-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: 0.5rem;
-}
-
-.notification-item {
-    padding: 1.25rem;
-    border-radius: var(--radius-sm);
-    background-color: var(--light);
-    border-left: 4px solid var(--primary);
-    transition: all 0.2s ease;
-}
-
-.notification-item:hover {
-    background-color: #e6f0ff;
-}
-
-.windows-notice {
-    color: var(--warning);
-    font-size: 0.85rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px dashed var(--border);
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .dashboard-header {
-        flex-direction: column;
-        padding: 1.25rem;
-        gap: 1rem;
-    }
-
-    .header-actions {
-        width: 100%;
-        flex-wrap: wrap;
-    }
-
-    .content {
-        padding: 1.5rem;
-    }
-
-    .section {
-        padding: 1.5rem;
-    }
-
-    #welcome-section {
-        font-size: 1.75rem;
-    }
-}
-
-/* Animation */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.section {
-    animation: fadeIn 0.4s ease forwards;
-}
-
-/* Loading States */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-    color: var(--gray);
-    font-style: italic; }
