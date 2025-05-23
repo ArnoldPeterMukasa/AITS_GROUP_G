@@ -36,7 +36,7 @@ function LecturerDashboard() {
       }
 
       const response = await fetch("https://aits-group-g-backend.onrender.com/api/issues/assigned/", {
-        method: "GET",
+        method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -109,7 +109,7 @@ function LecturerDashboard() {
     try {
       const token = localStorage.getItem("authToken")
       const response = await fetch(`https://aits-group-g-backend.onrender.com/api/issues/resolve/${selectedIssue.id}/`, {
-        method: "PUT",
+        method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
