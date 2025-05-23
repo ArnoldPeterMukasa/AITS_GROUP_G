@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./LoginPage.css"
-import { BASE_API_URL } from "../../config";
+import { BASE_API_URL } from "../config";
 
 
 function LoginPage() {
