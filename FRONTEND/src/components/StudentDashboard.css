@@ -59,6 +59,7 @@
 .issues-card {
     grid-column: 1 / -1;
     min-height: 400px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
 }
