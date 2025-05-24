@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios"; // Import axios for API requests
 import "./Register.css";
+import API from "../config.js";
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -61,7 +61,7 @@ function RegisterPage() {
         }
     
         try {
-            const response = await fetch("https://aits-group-g-backend.onrender.com/api/register/", {
+            const response = await fetch(`${API}/register/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
