@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import 'animate.css/animate.min.css'; // ✅ corrected import (no trailing slash)
 import './AcademicRegistrarDashboard.css';
+import API from '../config.js'; // Import your axios configuration
 
 function AcademicRegistrarDashboard() {
     const [issues, setIssues] = useState([]);
@@ -15,41 +16,56 @@ function AcademicRegistrarDashboard() {
         course: '',
         status: 'all',
     });
-    // const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
+    const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
     const navigate = useNavigate();
 
-    // ✅ Fetch registrar dashboard data
+    // ✅ Fetch registrar dashboard data using axios
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
+            setError(null);
             try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch('https://aits-group-g-backend.onrender.com/api/RegistrarDashboard/', {
-                    method: 'GET',
+                const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+                if (!token) {
+                    navigate('/login');
+                    return;
+                }
+
+                // Use your configured axios instance
+                const response = await API.get('/api/RegistrarDashboard/', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
                     },
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    setIssues(data.issues || []);
-                    setAnalytics({
-                        avgResolutionTime: data.avg_resolution_time || 0,
-                        unresolvedIssues: data.unresolved_issues || 0,
-                        totalIssues: data.total_issues || 0,
-                        overdueIssuesCount: data.overdue_issues_count || 0,
-                    });
-                } else {
-                    console.error('Failed to fetch data from the backend.');
-                }
+                const data = response.data;
+                setIssues(data.issues || []);
+                setAnalytics({
+                    avgResolutionTime: data.avg_resolution_time || 0,
+                    unresolvedIssues: data.unresolved_issues || 0,
+                    totalIssues: data.total_issues || 0,
+                    overdueIssuesCount: data.overdue_issues_count || 0,
+                });
+
             } catch (error) {
                 console.error('Error fetching data:', error);
+                
+                if (error.response?.status === 401) {
+                    // Handle unauthorized access
+                    localStorage.removeItem("authToken");
+                    sessionStorage.removeItem("authToken");
+                    navigate("/login");
+                } else {
+                    const errorMessage = error.response?.data?.message || error.message || "Failed to fetch dashboard data";
+                    setError(errorMessage);
+                }
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchData();
-    }, []);
+    }, [navigate]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -58,7 +74,13 @@ function AcademicRegistrarDashboard() {
 
     const handleLogout = () => {
         localStorage.removeItem("authToken");
+        sessionStorage.removeItem("authToken");
         navigate("/login");
+    };
+
+    const handleRetry = () => {
+        // Trigger a re-fetch by updating a dependency
+        window.location.reload();
     };
 
     const filteredIssues = issues.filter(issue => {
@@ -66,6 +88,9 @@ function AcademicRegistrarDashboard() {
         const courseMatch = !filters.course || issue.course === filters.course;
         return statusMatch && courseMatch;
     });
+
+    // Get unique courses from issues for the dropdown
+    const uniqueCourses = [...new Set(issues.map(issue => issue.course).filter(Boolean))];
 
     return (
         <div className="dashboard-container">
@@ -84,72 +109,117 @@ function AcademicRegistrarDashboard() {
             <div className="content">
                 <h1 className="animate__animated animate__fadeInDown">Academic Registrar Dashboard</h1>
 
-                <div className="overview">
-                    <div className="card">
-                        <h3>Total Issues</h3>
-                        <p>{analytics.totalIssues}</p>
+                {loading ? (
+                    <div className="loading-container">
+                        <p>Loading dashboard data...</p>
                     </div>
-                    <div className="card">
-                        <h3>Unresolved Issues</h3>
-                        <p>{analytics.unresolvedIssues}</p>
+                ) : error ? (
+                    <div className="error-container">
+                        <p className="error-message">Error: {error}</p>
+                        <button onClick={handleRetry} className="retry-btn">Try Again</button>
                     </div>
-                    <div className="card">
-                        <h3>Avg. Resolution Time</h3>
-                        <p>{analytics.avgResolutionTime}</p>
-                    </div>
-                    <div className="card">
-                        <h3>Overdue Issues</h3>
-                        <p>{analytics.overdueIssuesCount}</p>
-                    </div>
-                </div>
+                ) : (
+                    <>
+                        <div className="overview">
+                            <div className="card">
+                                <h3>Total Issues</h3>
+                                <p>{analytics.totalIssues}</p>
+                            </div>
+                            <div className="card">
+                                <h3>Unresolved Issues</h3>
+                                <p>{analytics.unresolvedIssues}</p>
+                            </div>
+                            <div className="card">
+                                <h3>Avg. Resolution Time</h3>
+                                <p>{analytics.avgResolutionTime} days</p>
+                            </div>
+                            <div className="card">
+                                <h3>Overdue Issues</h3>
+                                <p>{analytics.overdueIssuesCount}</p>
+                            </div>
+                        </div>
 
-                <div className="filters">
-                    <h3>Filters</h3>
-                    <form>
-                        <select name="course" value={filters.course} onChange={handleFilterChange}>
-                            <option value="">Select Course</option>
-                            <option value="Calculus 101">Calculus 101</option>
-                            <option value="Mechanical Engineering">Mechanical Engineering</option>
-                            <option value="Data Structures">Data Structures</option>
-                        </select>
+                        <div className="filters">
+                            <h3>Filters</h3>
+                            <form>
+                                <select name="course" value={filters.course} onChange={handleFilterChange}>
+                                    <option value="">All Courses</option>
+                                    {uniqueCourses.map(course => (
+                                        <option key={course} value={course}>{course}</option>
+                                    ))}
+                                    {/* Fallback static options if no courses are loaded */}
+                                    {uniqueCourses.length === 0 && (
+                                        <>
+                                            <option value="Calculus 101">Calculus 101</option>
+                                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                                            <option value="Data Structures">Data Structures</option>
+                                        </>
+                                    )}
+                                </select>
 
-                        <select name="status" value={filters.status} onChange={handleFilterChange}>
-                            <option value="all">All Statuses</option>
-                            <option value="open">Open</option>
-                            <option value="resolved">Resolved</option>
-                            <option value="pending">Pending</option>
-                            <option value="assigned">Assigned</option>
-                        </select>
-                    </form>
-                </div>
+                                <select name="status" value={filters.status} onChange={handleFilterChange}>
+                                    <option value="all">All Statuses</option>
+                                    <option value="open">Open</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="assigned">Assigned</option>
+                                    <option value="in_progress">In Progress</option>
+                                </select>
+                            </form>
+                        </div>
 
-                <div className="issues-list">
-                    <h3>Issues</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Category</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredIssues.length === 0 ? (
-                                <tr>
-                                    <td colSpan="3" style={{ textAlign: 'center' }}>No issues found</td>
-                                </tr>
-                            ) : (
-                                filteredIssues.map(issue => (
-                                    <tr key={issue.id}>
-                                        <td>{issue.title}</td>
-                                        <td>{issue.status}</td>
-                                        <td>{issue.category}</td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                        <div className="issues-list">
+                            <h3>Issues ({filteredIssues.length})</h3>
+                            <div className="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                            <th>Category</th>
+                                            <th>Course</th>
+                                            <th>Created Date</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredIssues.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>
+                                                    {filters.status !== 'all' || filters.course ? 
+                                                        'No issues match the selected filters' : 
+                                                        'No issues found'
+                                                    }
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredIssues.map(issue => (
+                                                <tr key={issue.id || `issue-${Math.random()}`}>
+                                                    <td>{issue.id}</td>
+                                                    <td className="title-cell">{issue.title}</td>
+                                                    <td>
+                                                        <span className={`status-badge status-${issue.status}`}>
+                                                            {issue.status}
+                                                        </span>
+                                                    </td>
+                                                    <td>{issue.category}</td>
+                                                    <td>{issue.course || 'N/A'}</td>
+                                                    <td>{issue.created_at ? new Date(issue.created_at).toLocaleDateString() : 'N/A'}</td>
+                                                    <td>
+                                                        <span className={`priority-badge priority-${issue.priority?.toLowerCase()}`}>
+                                                            {issue.priority || 'Normal'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./LecturerDashboard.css"
+import API from "../config.js";
 
 function LecturerDashboard() {
   const [issues, setIssues] = useState([])
@@ -28,6 +29,7 @@ function LecturerDashboard() {
 
   const fetchAssignedIssues = async () => {
     setLoading(true)
+    setError(null) // Clear previous errors
     try {
       const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
       if (!token) {
@@ -35,32 +37,37 @@ function LecturerDashboard() {
         return           
       }
 
-      const response = await fetch("https://aits-group-g-backend.onrender.com/api/issues/assigned/", {
-        method: "PUT",
+      // Use your configured axios instance
+      const response = await API.get("/api/issues/assigned/", {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        const issuesData = Array.isArray(data)
-          ? data
-          : data.issues || data.data || []
+      const data = response.data
+      const issuesData = Array.isArray(data)
+        ? data
+        : data.issues || data.data || []
 
-        setIssues(issuesData)
+      setIssues(issuesData)
 
-        const newIssues = issuesData.filter(issue => issue.status === "open")
-        if (newIssues.length > 0) {
-          setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
-        }
-      } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        setError(`Failed to load assigned issues: ${errorData.message || response.statusText}`)
+      const newIssues = issuesData.filter(issue => issue.status === "open")
+      if (newIssues.length > 0) {
+        setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
       }
+
     } catch (error) {
-      setError(`An error occurred while loading your assigned issues: ${error.message}`)
+      console.error('Fetch error:', error) // Add logging for debugging
+      
+      if (error.response?.status === 401) {
+        // Handle unauthorized access
+        localStorage.removeItem("authToken")
+        sessionStorage.removeItem("authToken")
+        navigate("/login")
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || "Unknown error"
+        setError(`Failed to load assigned issues: ${errorMessage}`)
+      }
     } finally {
       setLoading(false)
     }
@@ -85,19 +92,21 @@ function LecturerDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken")
+    sessionStorage.removeItem("authToken") // Also clear sessionStorage
     navigate("/login")
   }
 
   const openResolveModal = (issue) => {
     setSelectedIssue(issue)
     setResolutionComment("")
-    setSelectedStatus("resolved")
+    setSelectedStatus(issue.status || "resolved") // Set current status as default
     setIsResolveModalOpen(true)
   }
 
   const closeResolveModal = () => {
     setIsResolveModalOpen(false)
     setSelectedIssue(null)
+    setResolutionComment("")
   }
 
   const handleResolveIssue = async () => {
@@ -107,36 +116,44 @@ function LecturerDashboard() {
     }
 
     try {
-      const token = localStorage.getItem("authToken")
-      const response = await fetch(`https://aits-group-g-backend.onrender.com/api/issues/resolve/${selectedIssue.id}/`, {
-        method: "GET",
+      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
+      if (!token) {
+        navigate("/login")
+        return
+      }
+
+      // Use your configured axios instance
+      const response = await API.patch(`/api/issues/resolve/${selectedIssue.id}/`, {
+        status: selectedStatus,
+        resolution_comment: resolutionComment || `Status changed to ${selectedStatus} by lecturer`,
+      }, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          status: selectedStatus,
-          resolution_comment: resolutionComment || `Status changed to ${selectedStatus} by lecturer`,
-        }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        const updatedIssue = data.issue || data
+      const data = response.data
+      const updatedIssue = data.issue || data
 
-        setIssues(prevIssues =>
-          prevIssues.map(issue => (issue.id === selectedIssue.id ? updatedIssue : issue))
-        )
+      setIssues(prevIssues =>
+        prevIssues.map(issue => (issue.id === selectedIssue.id ? updatedIssue : issue))
+      )
 
-        alert(`Issue status has been updated to ${selectedStatus} successfully!`)
-        closeResolveModal()
-        fetchAssignedIssues()
-      } else {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }))
-        alert(`Failed to update the issue: ${errorData.message || response.statusText}`)
-      }
+      alert(`Issue status has been updated to ${selectedStatus} successfully!`)
+      closeResolveModal()
+      await fetchAssignedIssues() // Refresh the issues list
+
     } catch (error) {
-      alert(`An error occurred while updating the issue: ${error.message}`)
+      console.error('Update error:', error) // Add logging for debugging
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem("authToken")
+        sessionStorage.removeItem("authToken")
+        navigate("/login")
+      } else {
+        const errorMessage = error.response?.data?.message || error.message || "Unknown error"
+        alert(`Failed to update the issue: ${errorMessage}`)
+      }
     }
   }
 
@@ -159,7 +176,9 @@ function LecturerDashboard() {
         <h1>Welcome to the Lecturer Dashboard</h1>
 
         <div className="actions-bar">
-          <button className="refresh-btn" onClick={fetchAssignedIssues}>Refresh Issues</button>
+          <button className="refresh-btn" onClick={fetchAssignedIssues} disabled={loading}>
+            {loading ? 'Refreshing...' : 'Refresh Issues'}
+          </button>
         </div>
 
         <div className="overview">
@@ -215,7 +234,9 @@ function LecturerDashboard() {
                       <td>
                         {issue.status !== "resolved" && (
                           <div className="action-buttons">
-                            <button className="detail-btn" onClick={() => openResolveModal(issue)}>Update Status</button>
+                            <button className="detail-btn" onClick={() => openResolveModal(issue)}>
+                              Update Status
+                            </button>
                           </div>
                         )}
                       </td>

@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./LoginPage.css"
-import { BASE_API_URL } from "../config";
+import { loginUser } from "../config.js"  // ✅ use the loginUser function
 
 
 function LoginPage() {
@@ -17,68 +17,46 @@ function LoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    // Basic validation
     if (!username || !password) {
       setError("Username and password are required.")
       return
     }
 
-    // Clear any previous error
     setError(null)
 
     try {
-      // Send login data to the backend
-      const response = await fetch(`${BASE_API_URL}/login/`, {
+      // ✅ Call loginUser from config.js instead of fetch
+      const data = await loginUser({ username, password })
 
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password,        
-        }),
-      })
+      // ✅ Store token and role
+      localStorage.setItem("authToken", data.token)
+      localStorage.setItem("role", data.role)
 
-      if (response.ok) {
-        const data = await response.json()
-
-        // Debugging: Log the backend response
-        console.log("Login Response:", data)
-
-        // Save user data (e.g., token, role) to localStorage or state
-        localStorage.setItem("authToken", data.token) // Changed from "token" to "authToken"
-        localStorage.setItem("role", data.role) // Assuming the backend returns the user's role
-
-        // Navigate to the respective dashboard based on the user's role
-        if (data.role === "student") {
-          // Prepare student data to pass to dashboard
-          const studentData = {
-            name: data.name,
-            email: data.email,
-            registrationNumber: data.registrationNumber,
-            program: data.program,
-          }
-
-          navigate("/StudentDashboard", {
-            state: {
-              studentData: studentData,
-            },
-          })
-        } else if (data.role === "lecturer") {
-          navigate("/LecturerDashboard")
-        } else if (data.role === "registrar") {
-          navigate("/AcademicRegistrarDashboard")
-        } else {
-          setError("Invalid role or credentials.")
+      if (data.role === "student") {
+        const studentData = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          registrationNumber: data.registrationNumber,
+          program: data.program,
         }
+
+        navigate("/StudentDashboard", {
+          state: { studentData },
+        })
+      } else if (data.role === "lecturer") {
+        navigate("/LecturerDashboard")
+      } else if (data.role === "registrar") {
+        navigate("/AcademicRegistrarDashboard")
       } else {
-        const errorData = await response.json()
-        setError(errorData.message || "Invalid username or password.")
+        setError("Invalid role or credentials.")
       }
-    } catch (error) {
-      console.error("Error during login:", error)
-      setError("An error occurred. Please try again.")
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message)
+      } else {
+        setError("Login failed. Please try again.")
+      }
     }
   }
 
