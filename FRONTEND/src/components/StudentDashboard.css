@@ -1,4 +1,6 @@
 /* StudentDashboard.css */
+
+/* Overall Layout */
 .dashboard-container {
     min-height: 100vh;
     background-color: #f5f6fa;
@@ -24,6 +26,10 @@
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 1.5rem;
+    height: 100vh;
+    /* Ensure full viewport height */
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* Full-width Card Container */
@@ -32,6 +38,7 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     align-content: start;
+    overflow-y: auto;
 }
 
 /* Individual Cards */
@@ -40,9 +47,9 @@
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
-    height: 100%;
     display: flex;
     flex-direction: column;
+    height: 100%;
 }
 
 /* Profile Card Specifics */
@@ -55,19 +62,37 @@
     min-height: 200px;
 }
 
-/* Issues Card - Takes remaining space */
+/* Issues Card - Expands to take up more space */
 .issues-card {
     grid-column: 1 / -1;
-    min-height: 400px;
-    max-width: 100%;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    min-height: 600px;
+    height: 100%;
+    max-width: 100%;
 }
 
 /* Table inside Issues Card */
 .issues-table {
     flex-grow: 1;
-    overflow: auto;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
+/* Optional: Sticky Table Header */
+.issues-table table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.issues-table thead {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
 }
 
 /* Create Issue Form Card */
