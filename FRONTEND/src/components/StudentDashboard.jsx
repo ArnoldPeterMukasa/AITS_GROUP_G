@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
-import { fetchStudentProfile, setAuthToken } from "./Api";
+import { fetchStudentProfile, setAuthToken } from "../config.js"; // Adjust the import path as necessary
 import CreateIssueForm from "./CreateIssueForm";
 
 
