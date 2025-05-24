@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createIssue } from "./Api"; // Make sure path is correct
+import { createIssue } from "../config.js"; // Make sure path is correct
 import "./CreateIssueForm.css";
 
 function CreateIssueForm({ onIssueCreated }) {
