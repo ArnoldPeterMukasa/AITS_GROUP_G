@@ -32,13 +32,13 @@ function RegisterPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
         // Validate form data
         if (formData.password !== formData.confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
-    
+
         // Prepare the request body based on the selected role
         const requestBody = {
             username: formData.username,
@@ -51,27 +51,26 @@ function RegisterPage() {
             registration_number: formData.registrationNumber,
             course: formData.course,
         };
-    
+
         if (formData.role === "lecturer") {
             requestBody.lecturer_id = formData.lecturerId;
         }
-    
+
         if (formData.role === "registrar") {
             requestBody.academic_title = formData.academicTitle;
         }
-    
+
         try {
             const response = await fetch(`${API}/register/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                   
                 },
                 body: JSON.stringify(requestBody),
             });
-    
+
             if (response.ok) {
-                const data = await response.json();
+                await response.json();
                 alert("Registration successful!");
                 navigate("/login"); // Redirect to login page after successful registration
             } else {
@@ -84,7 +83,7 @@ function RegisterPage() {
             alert("An error occurred. Please try again.");
         }
     };
-    
+
     return (
         <div className="register-container">
             <h2>Register</h2>
@@ -237,9 +236,6 @@ function RegisterPage() {
                 )}
 
                 <button type="submit">Register</button>
-                <p>
-                    Already have an account? <Link to="/login">Login</Link>
-                </p>
             </form>
         </div>
     );
