@@ -24,7 +24,7 @@ function LecturerDashboard() {
   const navigate = useNavigate()
 
   const STATUS_CHOICES = [
-    { value: 'open', label: 'choose a status from the drop_down to fill description' },
+    { value: 'open', label: 'open' },
     { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' },
   ]
