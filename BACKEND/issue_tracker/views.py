@@ -976,27 +976,24 @@ class AssignedIssuesView(APIView):
 class ResolveIssueView(APIView):
     permission_classes = [IsAuthenticated]
     
-    def put(self, request, issue_id):
-
+    
+    def patch(self, request, issue_id):  # Changed from put to patch
         try:
-            issue_id = int(issue_id)
-            # Get the issue and check if it's assigned to the current user
             issue = Issue.objects.get(id=issue_id, assigned_to=request.user)
             
             # Get data from request
             status_update = request.data.get('status')
             resolution_comment = request.data.get('resolution_comment', '')
             
-            # Validate the status
-            if status_update not in [status for status, _ in Issue.STATUS_CHOICES]:
+            # Validate status
+            if status_update not in dict(Issue.STATUS_CHOICES).keys():
                 return Response({
-                    'status': 'error',
-                    'message': f"Invalid status. Choose from {[status for status, _ in Issue.STATUS_CHOICES]}"
+                    'error': f'Invalid status. Valid choices: {dict(Issue.STATUS_CHOICES).keys()}'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # Update the issue
+            # Update issue
             issue.status = status_update
-            
+            issue.resolution_comment = resolution_comment  # Make sure this field exists in your model
             # If we want to store resolution comments, we could add a field to the Issue model
             # issue.resolution_comment = resolution_comment  # Assuming this field exists
             
