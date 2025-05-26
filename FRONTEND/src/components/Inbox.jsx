@@ -33,7 +33,7 @@ function Inbox() {
                                 <li key={index}>{issue}</li>
                             ))
                         ) : (
-                            <p>No worked upon issues.</p>
+                            <p>No worked upon issues.</p>   
                         )}
                     </ul>
                     
