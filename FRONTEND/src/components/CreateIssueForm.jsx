@@ -58,7 +58,7 @@ function CreateIssueForm({ onIssueCreated }) {
     };
 
     return (
-        <div>
+        <div className="create-issue-container">
             <h1>Create Issue</h1>
             {error && <div className="error-message">{error}</div>}
             {success && <div className="success-message">{success}</div>}
