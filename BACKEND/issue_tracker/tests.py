@@ -31,3 +31,4 @@
 
 
 # {aisha_student3: "strongpassword123"}
+#{arnold_student1: "strongpassword123"}
