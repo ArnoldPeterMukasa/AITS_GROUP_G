@@ -23,10 +23,11 @@ import ManageIssues from './components/ManageIssues.jsx';
 import Assignments from './Assignments.jsx';
 import CourseContent from './CourseContent.jsx'
 import CreateIssueForm from './components/CreateIssueForm.jsx';
-
+import { NotificationProvider } from "./contexts/NotificationContext"
 
 const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
   <React.StrictMode>
+    <NotificationProvider>
     <Router>
       <Routes>
         <Route index element ={<Home/>} />
@@ -59,5 +60,6 @@ const root=ReactDOM.createRoot(document.getElementById('root'));root.render(
 
       </Routes>
     </Router>
+    </NotificationProvider>
   </React.StrictMode>,
 );
