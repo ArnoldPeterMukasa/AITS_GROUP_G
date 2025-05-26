@@ -37,7 +37,7 @@ function LecturerDashboard() {
     if (!token) {
       showNotification("Session expired! Please log in again", "error");
       navigate("/login");
-      return;
+      return;       
     }
 
     const response = await API.get("/api/issues/assigned/", {
