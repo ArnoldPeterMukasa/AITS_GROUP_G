@@ -28,14 +28,14 @@ export const setAuthToken = (token) => {
 
 // Fetch student profile
 export const fetchStudentProfile = async () => {
-  const response = await API.get("/studentDashboard/");
+  const response = await API.get("api/studentDashboard/");
   return response.data;
 };
 
 // Create an issue
 export const createIssue = async (issueData) => {
   try {
-    const response = await API.post("/api/issues/", issueData);
+    const response = await API.post("/api/create-issues/", issueData);
     return response.data;
   } catch (error) {
     console.error("Error creating issue:", error);
