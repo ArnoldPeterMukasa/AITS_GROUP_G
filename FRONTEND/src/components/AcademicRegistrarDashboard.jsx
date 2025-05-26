@@ -17,6 +17,8 @@ function AcademicRegistrarDashboard() {
         status: 'all',
     });
     const [notifications] = useState(["New issue reported!", "Lecturer request pending"]);
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
     const navigate = useNavigate();
 
     // ✅ Fetch registrar dashboard data using axios
