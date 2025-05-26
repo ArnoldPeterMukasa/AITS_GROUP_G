@@ -88,7 +88,7 @@ function AcademicRegistrarDashboard() {
     const filteredIssues = issues.filter(issue => {
         const statusMatch = filters.status === 'all' || issue.status === filters.status;
         const courseMatch = !filters.course || issue.course === filters.course;
-        return statusMatch && courseMatch;
+        return statusMatch && courseMatch;      
     });
 
     // Get unique courses from issues for the dropdown
