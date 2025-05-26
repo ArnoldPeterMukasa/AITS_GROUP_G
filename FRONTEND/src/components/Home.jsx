@@ -27,7 +27,7 @@ function Home() {
 
     return (
         <div className="home-container">
-            <header className="header">
+            <header className="header">   
                 <div className="logo">
                     <h1>Academic Issue Tracking System</h1>
                     <p className="university-name">Makerere University Group G</p>
