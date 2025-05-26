@@ -11,11 +11,12 @@ import ForgotPasswordPage from './components/ForgotPasswordPage';
 import ResetPasswordPage from './components/ResetPasswordPage';
 import Home from './components/Home';
 import Inbox from './components/Inbox';
-
+import { NotificationProvider } from "./contexts/NotificationContext"
 function App() {
   return (
     <Router>
       <Routes>
+        
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
