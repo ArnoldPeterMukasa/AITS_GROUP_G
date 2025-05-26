@@ -18,7 +18,7 @@ export default function CustomNotification() {
       default:
         return <FaExclamation className="notification-icon" />;
     }
-  };
+  };     
 
   return (
     <div className={`notification ${notification.type}`}>
