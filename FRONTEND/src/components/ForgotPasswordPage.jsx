@@ -72,13 +72,13 @@ function ForgotPasswordPage() {
                 
                 <div className="form-header">
                     <div className="form-icon">
-                        <FiMail size={32} />
+                        <FiMail size={32} />      
                     </div>
                     <h1>Forgot Password?</h1>
                     <p className="subtext">
                         Enter your email and we'll send you a code to reset your password
                     </p>
-                </div>
+                </div>  
 
                 <form onSubmit={handleSubmit} className="forgot-password-form">
                     <div className={`form-group ${error ? 'error' : ''}`}>
