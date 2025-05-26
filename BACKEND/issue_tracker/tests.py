@@ -36,3 +36,4 @@
 #{karungi_student4: "strongpassword123"}
 #{aisha_student5: "strongpassword123"}
 #{karungi_student6: "strongpassword123"}
+#{habibah_student7: "strongpassword123"}
