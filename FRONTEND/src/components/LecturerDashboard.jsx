@@ -1,11 +1,13 @@
-"use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./LecturerDashboard.css"
 import API from "../config.js";
+import { NotificationContext } from "../contexts/NotificationContext";
+import CustomNotification from "../components/CustomNotification";
 
 function LecturerDashboard() {
+  const { showNotification } = useContext(NotificationContext);
   const [issues, setIssues] = useState([])
   const [notifications, setNotifications] = useState(["New assignment posted!", "Course content updated"])
   const [courseContent] = useState([
@@ -26,52 +28,49 @@ function LecturerDashboard() {
     { value: 'in_progress', label: 'In Progress' },
     { value: 'resolved', label: 'Resolved' },
   ]
-
+ 
   const fetchAssignedIssues = async () => {
-    setLoading(true)
-    setError(null) // Clear previous errors
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
-      if (!token) {
-        navigate("/login")
-        return           
-      }
-
-      // Use your configured axios instance
-      const response = await API.get("/api/issues/assigned/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const data = response.data
-      const issuesData = Array.isArray(data)
-        ? data
-        : data.issues || data.data || []
-
-      setIssues(issuesData)
-
-      const newIssues = issuesData.filter(issue => issue.status === "open")
-      if (newIssues.length > 0) {
-        setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev])
-      }
-
-    } catch (error) {
-      console.error('Fetch error:', error) // Add logging for debugging
-      
-      if (error.response?.status === 401) {
-        // Handle unauthorized access
-        localStorage.removeItem("authToken")
-        sessionStorage.removeItem("authToken")
-        navigate("/login")
-      } else {
-        const errorMessage = error.response?.data?.message || error.message || "Unknown error"
-        setError(`Failed to load assigned issues: ${errorMessage}`)
-      }
-    } finally {
-      setLoading(false)
+  setLoading(true);
+  setError(null);
+  try {
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) {
+      showNotification("Session expired! Please log in again", "error");
+      navigate("/login");
+      return;
     }
+
+    const response = await API.get("/api/issues/assigned/", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = response.data;
+    const issuesData = Array.isArray(data) ? data : data.issues || data.data || [];
+    setIssues(issuesData);
+
+    const newIssues = issuesData.filter(issue => issue.status === "open");
+    if (newIssues.length > 0) {
+      showNotification(`${newIssues.length} new issue(s) assigned to you`, "info");
+      setNotifications(prev => [`${newIssues.length} new issue(s) assigned to you`, ...prev]);
+    }
+
+  } catch (error) {
+    console.error('Fetch error:', error);
+    
+    if (error.response?.status === 401) {
+      showNotification("Session expired! Please log in again", "error");
+      localStorage.removeItem("authToken");
+      sessionStorage.removeItem("authToken");
+      navigate("/login");
+    } else {
+      const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+      showNotification(`Failed to load issues: ${errorMessage}`, "error");
+      setError(`Failed to load assigned issues: ${errorMessage}`);
+    }
+  } finally {
+    setLoading(false);
   }
+};
 
   useEffect(() => {
     fetchAssignedIssues()
@@ -91,11 +90,17 @@ function LecturerDashboard() {
   }, [showStatusDropdown])
 
   const handleLogout = () => {
+    showNotification("Logging out...", "info");
+    setTimeout(() => {
+      localStorage.removeItem("authToken");
+      sessionStorage.removeItem("authToken");
+      showNotification("You have been logged out!", "success");
+      setTimeout(() => navigate("/login"), 2000);
+    }, 1000);
     localStorage.removeItem("authToken")
     sessionStorage.removeItem("authToken") // Also clear sessionStorage
     navigate("/login")
   }
-
   const openResolveModal = (issue) => {
     setSelectedIssue(issue)
     setResolutionComment("")
@@ -109,64 +114,65 @@ function LecturerDashboard() {
     setResolutionComment("")
   }
 
-  const handleResolveIssue = async () => {
-    if (!selectedIssue?.id) {
-      alert("No issue selected")
-      return
-    }
-
-    try {
-      const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken")
-      if (!token) {
-        navigate("/login")
-        return
-      }
-
-      // Use your configured axios instance
-      const response = await API.patch(`/api/issues/resolve/${selectedIssue.id}/`, {
-        status: selectedStatus,
-        resolution_comment: resolutionComment || `Status changed to ${selectedStatus} by lecturer`,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      const data = response.data
-      const updatedIssue = data.issue || data
-
-      setIssues(prevIssues =>
-        prevIssues.map(issue => (issue.id === selectedIssue.id ? updatedIssue : issue))
-      )
-
-      alert(`Issue status has been updated to ${selectedStatus} successfully!`)
-      closeResolveModal()
-      await fetchAssignedIssues() // Refresh the issues list
-
-    } catch (error) {
-      console.error('Update error:', error) // Add logging for debugging
-      
-      if (error.response?.status === 401) {
-        localStorage.removeItem("authToken")
-        sessionStorage.removeItem("authToken")
-        navigate("/login")
-      } else {
-        const errorMessage = error.response?.data?.message || error.message || "Unknown error"
-        alert(`Failed to update the issue: ${errorMessage}`)
-      }
-    }
+const handleResolveIssue = async () => {
+  if (!selectedIssue?.id) {
+    showNotification("No issue selected", "error");
+    return;
   }
 
+  try {
+    showNotification("Updating issue status...", "info");
+    
+    const token = localStorage.getItem("authToken") || sessionStorage.getItem("authToken");
+    if (!token) {
+      showNotification("Session expired! Please log in again", "error");
+      navigate("/login");
+      return;
+    }
+
+    const response = await API.patch(`/api/issues/resolve/${selectedIssue.id}/`, {
+      status: selectedStatus,
+      resolution_comment: resolutionComment || `Status changed to ${selectedStatus} by lecturer`,
+    }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = response.data;
+    const updatedIssue = data.issue || data;
+
+    setIssues(prevIssues =>
+      prevIssues.map(issue => (issue.id === selectedIssue.id ? updatedIssue : issue))
+    );
+
+    showNotification(`Issue status updated to ${selectedStatus} successfully!`, "success");
+    closeResolveModal();
+    await fetchAssignedIssues();
+
+  } catch (error) {
+    console.error('Update error:', error);
+    
+    if (error.response?.status === 401) {
+      showNotification("Session expired! Please log in again", "error");
+      localStorage.removeItem("authToken");
+      sessionStorage.removeItem("authToken");
+      navigate("/login");
+    } else {
+      const errorMessage = error.response?.data?.message || error.message || "Unknown error";
+      showNotification(`Failed to update issue: ${errorMessage}`, "error");
+    }
+  }
+};
+
   return (
-    <div className="dashboard-container">
+<div className="dashboard-container">
+    <CustomNotification />
       <div className="sidebar">
         <h2>Lecturer Dashboard</h2>
         <ul>
           <li><Link to="/LecturerDashboard">Home</Link></li>
-          <li><Link to="/ManageIssues">Manage Issues</Link></li>
+          {/* <li><Link to="/ManageIssues">Manage Issues</Link></li> */}
           <li><Link to="/ReportsPage">Reports</Link></li>
           <li><Link to="/CourseContent">Course Content</Link></li>
-          <li><Link to="/Notifications">Notifications ({notifications.length})</Link></li>
           <li><Link to="/Settings">Settings</Link></li>
           <li><button onClick={handleLogout}>Logout</button></li>
         </ul>
