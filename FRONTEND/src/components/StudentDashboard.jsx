@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./StudentDashboard.css";
-import { fetchStudentProfile, setAuthToken } from "./Api";
+import { fetchStudentProfile, setAuthToken } from "../config.js";
 import CreateIssueForm from "./CreateIssueForm";
 
 function StudentDashboard() {
@@ -88,10 +88,12 @@ function StudentDashboard() {
                     <>
                         <div className="overview">
                             <div className="card">
-                                <h3>Your Profile</h3>
-                                <p><strong>Name:</strong> {user.name}</p>
-                                <p><strong>Email:</strong> {user.email}</p>
-                                <p><strong>Reg No:</strong> {user.registration_number}</p>
+                                 <div className="form-container">
+                                    <h3>Your Profile</h3>
+                                    <p><strong>Name:</strong> {user.name}</p>
+                                    <p><strong>Email:</strong> {user.email}</p>
+                                    <p><strong>Reg No:</strong> {user.registration_number}</p>
+                                </div>
                             </div>
 
                             <div className="card">
@@ -100,12 +102,12 @@ function StudentDashboard() {
                             </div>
                         </div>
 
-                        <div className="card">
+                        
                             <h3>Create Issue</h3>
                             <CreateIssueForm onIssueCreated={handleIssueCreated} />
-                        </div>
+                        
 
-                        <div className="card">
+                        
                             <h3>Your Issues</h3>
                             {issues.length > 0 ? (
                                 <table>
@@ -131,10 +133,10 @@ function StudentDashboard() {
                             ) : (
                                 <p>No issues submitted yet.</p>
                             )}
-                        </div>
+                    
                     </>
                 ) : (
-                    <div className="card">
+                    <div className="notifications">
                         <h3>Notifications</h3>
                         <ul className="notifications-list">
                             {user?.workedUponIssues?.length > 0 ? (
