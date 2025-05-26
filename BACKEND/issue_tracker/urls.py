@@ -28,7 +28,7 @@ urlpatterns = [
     #path('lecturers/', LecturerListView.as_view(), name='lecturer-list'),
     path('lecturers/', get_lecturers, name='lecturer-list'),
     path('student_registration',StudentRegistrationView.as_view(), name='student_registration'),
-    path('api/issues/resolve/<str:issue_id>/', ResolveIssueView.as_view(), name='resolve-issue'),
+    path('issues/resolve/<str:issue_id>/', ResolveIssueView.as_view(), name='resolve-issue'),
 
     path('', include(router.urls)),
 ]
