@@ -19,7 +19,7 @@ function CreateIssueForm({ onIssueCreated }) {
             ...prevState,
             [name]: value
         }));
-    };
+    };     
 
     const handleSubmit = async (e) => {
         e.preventDefault();
